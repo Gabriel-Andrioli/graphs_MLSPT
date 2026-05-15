@@ -1,0 +1,59 @@
+DCC059 :: Teoria dos Grafos
+Trabalho Prático 1
+Objetivo
+O objetivo deste trabalho é implementar estruturas de representação de grafos e algoritmos básicos de Teoria dos Grafos, analisando como diferentes escolhas de estruturas de dados impactam a implementação e a eficiência. O trabalho deverá ser desenvolvido em grupo com até 4 alunos.
+Cada grupo receberá:
+1. Uma estrutura de dados para representação do grafo;
+2. Um conjunto específico de algoritmos para implementar.
+
+Além disso, todos os grupos deverão implementar um conjunto comum de operações básicas de manipulação de grafos.
+Parte 1 – Representação do Grafo
+Cada grupo deverá implementar um TAD (Tipo Abstrato de Dados) para grafos utilizando a estrutura de dados designada.
+
+Sua estrutura de dados designada: Lista de Adjacência
+O grafo deve suportar ser:
+• orientado ou não orientado;
+• ponderado ou não ponderado.
+A implementação deve permitir configurar essas características.
+
+Parte 2 – Operações Obrigatórias
+Deverão ser implementadas as seguintes operações:
+Manipulação do grafo
+1. Inserir vértice;
+2. Remover vértice;
+3. Inserir aresta;
+4. Remover aresta;
+5. Verificar existência de aresta;
+6. Alterar peso de uma aresta;
+7. Exibir o grafo.
+Informações sobre vértices
+1. Calcular grau de um vértice;
+2. Listar vizinhos de um vértice;
+3. Verificar se dois vértices são adjacentes;
+A implementação deve incluir uma função chamada testAll que teste cada uma destas operações obrigatórias.
+
+Parte 3 – Algoritmos
+Além das operações obrigatórias, cada grupo deverá implementar um conjunto
+específico de algoritmos.
+
+Seu conjunto de algoritmos: Problema de Componentes conexas
+
+Requisitos da Implementação
+Linguagem
+O trabalho deve ser implementado em C++
+
+Requisitos mínimos
+O trabalho deve:
+• possuir modularização adequada;
+• utilizar funções/métodos bem definidos;
+• possuir comentários no código;
+• evitar repetição desnecessária de código;
+• permitir testes com diferentes grafos.
+
+Entrada e Saída
+O programa deverá permitir:
+• carregar grafos a partir de arquivo;
+• editar grafo de entrada;
+• exibir resultados de forma organizada.
+Formato sugerido para arquivo
+Formato adotado pelo editor https://csacademy.com/app/graph_editor/
