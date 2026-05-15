@@ -11,6 +11,7 @@ Parte 1 – Representação do Grafo
 Cada grupo deverá implementar um TAD (Tipo Abstrato de Dados) para grafos utilizando a estrutura de dados designada.
 
 Sua estrutura de dados designada: Lista de Adjacência
+
 O grafo deve suportar ser:
 • orientado ou não orientado;
 • ponderado ou não ponderado.
