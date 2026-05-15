@@ -1,0 +1,46 @@
+# Build directory
+build/
+bin/
+out/
+
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+cmake_install.cmake
+install_manifest.txt
+Makefile
+compile_commands.json
+
+# Compiler generated files
+*.o
+*.obj
+*.so
+*.a
+*.lib
+*.dll
+*.exe
+*.out
+*.app
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+.vs/
+*.user
+*.userosscache
+*.sln
+*.vcxproj
+*.filters
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Other
+*.log
+
+# My Dev Container
+.devcontainer/
