@@ -385,7 +385,7 @@ void Graph::print_connected_components()
         {
             cout << components[i][j];
             if (j < (int)components[i].size() - 1)
-                cout << " -> ";
+                cout << ", ";
         }
         cout << "\n";
     }

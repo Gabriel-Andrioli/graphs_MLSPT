@@ -7,7 +7,6 @@ using namespace std;
 pair<bool, bool> configure_graph()
 {
     char directed_char, weighted_char;
-
     cout << "=== CONFIGURACAO DO GRAFO ===\n";
 
     do
@@ -50,7 +49,6 @@ void initial_menu(Graph &graph)
 
         if (option == '0')
         {
-            // Criar grafo vazio - já foi criado com as configurações
             cout << "\nGrafo criado com configuracao inicial.\n";
             break;
         }
@@ -82,17 +80,20 @@ void initial_menu(Graph &graph)
 void main_menu(Graph &graph)
 {
     char option;
+
     do
     {
         cout << "\n=== MENU PRINCIPAL ===\n";
-        cout << "0 - Exibir grafo\n";
-        cout << "1 - Adicionar aresta\n";
-        cout << "2 - Remover aresta\n";
-        cout << "3 - Verificar existencia de aresta\n";
-        cout << "4 - Alterar peso de aresta (apenas grafos ponderados)\n";
-        cout << "5 - Calcular grau de um vertice\n";
-        cout << "6 - Listar vizinhos de um vertice\n";
-        cout << "7 - Verificar se dois vertices sao adjacentes\n";
+        cout << "0 - Mostrar grafo\n";
+        cout << "1 - Adicionar vertice\n";
+        cout << "2 - Remover vertice\n";
+        cout << "3 - Adicionar aresta\n";
+        cout << "4 - Remover aresta\n";
+        cout << "5 - Verificar existencia de aresta\n";
+        cout << "6 - Alterar peso de aresta (apenas grafos ponderados)\n";
+        cout << "7 - Calcular grau de um vertice\n";
+        cout << "8 - Listar vizinhos de um vertice\n";
+        cout << "9 - Verificar se dois vertices sao adjacentes\n";
         cout << "C - Componentes Conexas\n";
         cout << "X - Sair\n";
         cout << "Escolha: ";
@@ -105,6 +106,36 @@ void main_menu(Graph &graph)
             graph.print();
         }
         else if (option == '1')
+        {
+            int id;
+            cout << "ID do novo vertice: ";
+            cin >> id;
+
+            if (graph.add_vertex(id) == -1)
+            {
+                cout << "Falha ao adicionar vertice (id ja existe).\n";
+            }
+            else
+            {
+                cout << "Vertice " << id << " adicionado com sucesso!\n";
+            }
+        }
+        else if (option == '2')
+        {
+            int id;
+            cout << "ID do vertice a remover: ";
+            cin >> id;
+
+            if (graph.remove_vertex(id))
+            {
+                cout << "Vertice " << id << " removido com sucesso!\n";
+            }
+            else
+            {
+                cout << "Falha ao remover vertice (vertice nao encontrado).\n";
+            }
+        }
+        else if (option == '3')
         {
             int u, v, weight = 1;
             cout << "ID do vertice u: ";
@@ -127,7 +158,7 @@ void main_menu(Graph &graph)
                 cout << "Falha ao adicionar aresta (vertices inexistentes ou aresta ja existe).\n";
             }
         }
-        else if (option == '2')
+        else if (option == '4')
         {
             int u, v;
             cout << "ID do vertice u: ";
@@ -144,7 +175,7 @@ void main_menu(Graph &graph)
                 cout << "Falha ao remover aresta (aresta nao existe).\n";
             }
         }
-        else if (option == '3')
+        else if (option == '5')
         {
             int u, v;
             cout << "ID do vertice u: ";
@@ -161,7 +192,7 @@ void main_menu(Graph &graph)
                 cout << "Nao existe aresta entre " << u << " e " << v << ".\n";
             }
         }
-        else if (option == '4')
+        else if (option == '6')
         {
             if (!graph.is_weighted())
             {
@@ -186,7 +217,7 @@ void main_menu(Graph &graph)
                 cout << "Falha ao alterar peso (aresta nao existe).\n";
             }
         }
-        else if (option == '5')
+        else if (option == '7')
         {
             int id;
             cout << "ID do vertice: ";
@@ -202,7 +233,7 @@ void main_menu(Graph &graph)
                 cout << "Grau do vertice " << id << ": " << deg << endl;
             }
         }
-        else if (option == '6')
+        else if (option == '8')
         {
             int id;
             cout << "ID do vertice: ";
@@ -223,7 +254,7 @@ void main_menu(Graph &graph)
                 cout << endl;
             }
         }
-        else if (option == '7')
+        else if (option == '9')
         {
             int u, v;
             cout << "ID do vertice u: ";
@@ -260,12 +291,11 @@ int main(int argc, char *argv[])
 {
     // Configuração inicial do grafo
     auto [directed, weighted] = configure_graph();
+
     // Cria o grafo com as configurações
     Graph graph(directed, weighted);
 
-    // Menu inicial
     initial_menu(graph);
-    // Menu principal
     main_menu(graph);
 
     return 0;
