@@ -17,15 +17,22 @@ Graph::Graph(bool directed, bool weighted)
     this->weighted = weighted;
 }
 
+// Getters para directed e weighted
+bool Graph::is_directed() const
+{
+    return directed;
+}
+
+bool Graph::is_weighted() const
+{
+    return weighted;
+}
+
 Node *Graph::find_node(int id)
 {
-    for (Node *n : nodes)
-    {
-        if (n->id == id)
-        {
-            return n;
-        }
-    }
+    auto it = node_map.find(id);
+    if (it != node_map.end())
+        return it->second;
     return nullptr;
 }
 
@@ -35,6 +42,7 @@ Graph::~Graph()
     {
         delete node;
     }
+    node_map.clear(); // limpa o mapa
 }
 
 void Graph::clear_visited()
@@ -67,7 +75,9 @@ int Graph::add_vertex(int id)
     if (find_node(id))
         return -1; // id já existe
 
-    nodes.push_back(new Node(id));
+    Node *novo = new Node(id);
+    nodes.push_back(novo);
+    node_map[id] = novo; // adiciona ao mapa
     return id;
 }
 
@@ -107,6 +117,8 @@ bool Graph::remove_vertex(int id)
     // deleta o no e remove do vetor
     delete target;
     nodes.erase(nodes.begin() + i);
+
+    node_map.erase(id); // remove do mapa
     return true;
 }
 
@@ -283,31 +295,99 @@ bool Graph::are_adjacent(int u, int v)
     return has_edge(u, v);
 }
 
-void Graph::dfs_recursive(int start)
-{
-    // encontra o nó de partida usando find_node
-    Node *start_node = find_node(start);
-    if (!start_node)
-    {
-        cout << "Vertice " << start << " nao encontrado.\n";
-        return;
-    }
-
-    clear_visited();
-    dfs_recursive_helper(start_node);
-    cout << "\n";
-}
-
-void Graph::dfs_recursive_helper(Node *node)
+void Graph::dfs_collect(Node *node, vector<int> &component,
+                        const vector<vector<int>> &ghostNodeNeighbors,
+                        const unordered_map<int, int> &node_index)
 {
     node->visited = true;
-    cout << node->id << " ";
+    component.push_back(node->id);
 
+    // Percorre vizinhos diretos (arestas forward)
     for (Edge &e : node->neighbors)
     {
         if (!e.target->visited)
         {
-            dfs_recursive_helper(e.target);
+            dfs_collect(e.target, component, ghostNodeNeighbors, node_index);
         }
     }
+
+    // Se houver ghostNodeNeighbors (apenas para grafos direcionados),
+    // percorre os vizinhos reversos (arcos que chegam neste no)
+    if (!ghostNodeNeighbors.empty())
+    {
+        int i = node_index.at(node->id);
+        for (int rev_id : ghostNodeNeighbors[i])
+        {
+            Node *rev_node = find_node(rev_id);
+            if (rev_node && !rev_node->visited)
+            {
+                dfs_collect(rev_node, component, ghostNodeNeighbors, node_index);
+            }
+        }
+    }
+}
+
+vector<vector<int>> Graph::connected_components()
+{
+    vector<vector<int>> components;
+    clear_visited();
+
+    // Mapeamento de id do no para indice no vetor nodes (para acesso O(1) ao ghostNodeNeighbors)
+    unordered_map<int, int> node_index;
+    for (int i = 0; i < (int)nodes.size(); i++)
+    {
+        node_index[nodes[i]->id] = i;
+    }
+
+    // Constroi lista de adjacencia invertida apenas para grafos direcionados
+    // ghostNodeNeighbors[v] contem todos os ids u tais que existe arco u -> v
+    vector<vector<int>> ghostNodeNeighbors;
+    if (directed)
+    {
+        ghostNodeNeighbors.resize(nodes.size());
+        for (Node *u : nodes)
+        {
+            for (Edge &e : u->neighbors)
+            {
+                int v_idx = node_index[e.target->id];
+                ghostNodeNeighbors[v_idx].push_back(u->id);
+            }
+        }
+    }
+
+    // Percorre todos os vertices, executando DFS a partir de cada no nao visitado
+    for (Node *node : nodes)
+    {
+        if (!node->visited)
+        {
+            vector<int> component;
+            dfs_collect(node, component, ghostNodeNeighbors, node_index);
+            components.push_back(component);
+        }
+    }
+
+    return components;
+}
+
+void Graph::print_connected_components()
+{
+    vector<vector<int>> components = connected_components();
+
+    cout << "\n====================================\n";
+    cout << "Componentes Conexas\n";
+    cout << "====================================\n";
+    cout << "Total de componentes: " << components.size() << "\n\n";
+
+    for (int i = 0; i < (int)components.size(); i++)
+    {
+        cout << "Componente " << i + 1 << " (tamanho " << components[i].size() << "): ";
+        for (int j = 0; j < (int)components[i].size(); j++)
+        {
+            cout << components[i][j];
+            if (j < (int)components[i].size() - 1)
+                cout << " -> ";
+        }
+        cout << "\n";
+    }
+    cout << "====================================\n";
 }

@@ -5,6 +5,7 @@
 #include <queue>
 #include <stack>
 #include <iostream>
+#include <unordered_map>
 
 using namespace std;
 
@@ -35,15 +36,20 @@ public:
 class Graph
 {
 private:
-    vector<Node *> nodes;    // vetor de ponteiros para todos os nos do grafo
-    bool directed;           // flag de direcionado
-    bool weighted;           // flag de ponderado
-    void clear_visited();    // limpa o flag visitado de todos os nos
-    Node *find_node(int id); // procura no vetor de ponteiros de nós o nó com id informado
+    vector<Node *> nodes;                // vetor de ponteiros para todos os nos do grafo
+    unordered_map<int, Node *> node_map; // mapa para acesso O(1) a nós por id
+    bool directed;                       // flag de direcionado
+    bool weighted;                       // flag de ponderado
+    void clear_visited();                // limpa o flag visitado de todos os nos
+    Node *find_node(int id);             // procura no vetor de ponteiros de nós o nó com id informado
 
 public:
     Graph(bool directed = false, bool weighted = false);
     ~Graph();
+
+    // Getters para directed e weighted
+    bool is_directed() const;
+    bool is_weighted() const;
 
     int add_vertex(int id);                         // 1. Inserir vértice
     bool remove_vertex(int id);                     // 2. Remover vértice
@@ -59,10 +65,19 @@ public:
 
     void dfs_recursive(int start);
 
+    // Algoritmo de componentes conexas
+    vector<vector<int>> connected_components();
+    void print_connected_components();
+
 private:
     void dfs_recursive_helper(Node *node);
 
     int find_neighbor_index(int u, int v); // procura indice de um nó na lista de adjacência de outro, informando sua posição/indice na lista
+
+    // helpers para componentes conexas
+    void dfs_collect(Node *node, vector<int> &component,
+                     const vector<vector<int>> &reverse_adj,
+                     const unordered_map<int, int> &node_index);
 };
 
 #endif
