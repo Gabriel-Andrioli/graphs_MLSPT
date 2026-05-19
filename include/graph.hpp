@@ -6,6 +6,8 @@
 #include <stack>
 #include <iostream>
 #include <unordered_map>
+#include <fstream>
+#include <sstream>
 
 using namespace std;
 
@@ -68,6 +70,9 @@ public:
     // Algoritmo de componentes conexas
     vector<vector<int>> connected_components();
     void print_connected_components();
+
+    // Leitura de arquivo
+    bool readFromFile(const string &filename);
 
 private:
     void dfs_recursive_helper(Node *node);

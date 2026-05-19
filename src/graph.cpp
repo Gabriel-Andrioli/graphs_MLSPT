@@ -1,4 +1,6 @@
 #include "graph.hpp"
+#include <fstream>
+#include <sstream>
 
 using namespace std;
 
@@ -254,7 +256,7 @@ void Graph::print()
             if (weighted)
             {
                 cout << node->neighbors[i].target->id
-                     << "(" << node->neighbors[i].weight << ") ";
+                     << "(P:" << node->neighbors[i].weight << ") ";
             }
             else
             {
@@ -390,4 +392,66 @@ void Graph::print_connected_components()
         cout << "\n";
     }
     cout << "====================================\n";
+}
+
+// Leitura de arquivo
+bool Graph::readFromFile(const string &filename)
+{
+    string filepath = "../graphFiles/" + filename;
+    ifstream file(filepath);
+
+    if (!file.is_open())
+    {
+        cerr << "Erro ao abrir arquivo: " << filepath << endl;
+        return false;
+    }
+
+    string line;
+    while (getline(file, line))
+    {
+        // Ignora linhas vazias
+        if (line.empty())
+            continue;
+
+        // Remove espaços em branco no início e fim
+        size_t first = line.find_first_not_of(' ');
+        size_t last = line.find_last_not_of(' ');
+        if (first == string::npos || last == string::npos) // linha vazia
+            continue;
+        line = line.substr(first, (last - first) + 1);
+
+        // Verifica se a linha contém apenas um número (vértice)
+        // ou dois números separados por espaço (aresta)
+        stringstream ss(line);
+        int u, v = -1;
+        ss >> u;
+
+        if (ss.fail())
+        {
+            // Linha inválida, ignora
+            continue;
+        }
+
+        // Tenta ler o segundo número
+        if (ss >> v)
+        {
+            // Linha contém dois números: aresta u -> v
+            // Adiciona aresta (considera o grafo direcionado ou não)
+            if (!add_edge(u, v))
+            {
+                cerr << "Aviso: Não foi possível adicionar aresta " << u << " -> " << v << endl;
+            }
+        }
+        else
+        {
+            // Linha contém apenas um número: vértice
+            if (add_vertex(u) == -1)
+            {
+                cerr << "Aviso: Não foi possível adicionar vértice " << u << " (id já existe).\n";
+            }
+        }
+    }
+
+    file.close();
+    return true;
 }
