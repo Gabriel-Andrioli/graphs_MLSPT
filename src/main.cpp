@@ -90,61 +90,53 @@ void test_all()
 
     cout << "--- Teste de direcionamento e ponderacao ---\n";
     cout << "Direcionado: " << (graph.is_directed() ? "SIM" : "NAO") << endl;
+    cout << "Resposta esperada: SIM\n";
     cout << "Ponderado: " << (graph.is_weighted() ? "SIM" : "NAO") << endl;
+    cout << "Resposta esperada: SIM\n";
 
-    cout << "\n--- Teste: adicionar vértices ---\n";
-    cout << "Adicionando vertices 1, 2, 3, 4, 5...\n";
+    cout << "\n--- Teste: adicionar vertices ---\n";
+    cout << "Adicionando vertices 1, 2, 3, 4, 5\n";
     graph.add_vertex(1);
     graph.add_vertex(2);
     graph.add_vertex(3);
     graph.add_vertex(4);
     graph.add_vertex(5);
     cout << "Tentativa de adicionar vertice 1 novamente (deve falhar): ";
-    if (graph.add_vertex(1) == -1)
-        cout << "FALHA (correto - id ja existe)\n";
+    graph.add_vertex(1);
 
-    // 2. Inserir arestas
     cout << "\n--- Teste: adicionar arestas ---\n";
-    cout << "Adicionando arestas: 1->2 (peso 10), 1->3 (peso 20), 2->4 (peso 30), 3->4 (peso 40), 4->5 (peso 50)...\n";
+    cout << "Adicionando arestas: 1->2 (peso 10), 1->3 (peso 20), 2->4 (peso 30), 3->4 (peso 40), 4->5 (peso 50)\n";
     graph.add_edge(1, 2, 10);
     graph.add_edge(1, 3, 20);
     graph.add_edge(2, 4, 30);
     graph.add_edge(3, 4, 40);
     graph.add_edge(4, 5, 50);
     cout << "Tentativa de adicionar aresta 1->2 novamente (deve falhar): ";
-    if (!graph.add_edge(1, 2))
-        cout << "FALHA (correto - aresta ja existe)\n";
+    graph.add_edge(1, 2);
     cout << "Tentativa de adicionar aresta com vertice inexistente 1->99 (deve falhar): ";
-    if (!graph.add_edge(1, 99))
-        cout << "FALHA (correto - vertice 99 nao existe)\n";
+    graph.add_edge(1, 99);
 
-    // 3. Exibir o grafo
     cout << "\n--- Teste: exibir grafo ---\n";
     graph.print();
 
-    // 4. Verificar existência de aresta
     cout << "\n--- Teste: verificar existência de aresta ---\n";
-    cout << "Existe aresta 1->2? " << (graph.has_edge(1, 2) ? "SIM" : "NAO") << endl;
-    cout << "Existe aresta 2->1? " << (graph.has_edge(2, 1) ? "SIM" : "NAO") << " (direcionado: deve ser NAO)\n";
-    cout << "Existe aresta 1->99? " << (graph.has_edge(1, 99) ? "SIM" : "NAO") << " (deve ser NAO - destino inexistente)\n";
+    cout << "Existe aresta 1->2? " << (graph.has_edge(1, 2) ? "SIM" : "NAO") << " (Resposta esperada: SIM)\n";
+    cout << "Existe aresta 2->1? " << (graph.has_edge(2, 1) ? "SIM" : "NAO") << " (Resposta esperada: NAO)\n";
+    cout << "Existe aresta 1->99? " << (graph.has_edge(1, 99) ? "SIM" : "NAO") << " (Resposta esperada: NAO)\n";
 
-    // 5. Alterar peso de aresta
     cout << "\n--- Teste: alterar peso de aresta ---\n";
-    cout << "Alterando peso da aresta 1->2 para 99...\n";
+    cout << "Alterando peso da aresta 1->2 para 99\n";
     graph.set_edge_weight(1, 2, 99);
-    cout << "Verificando: has_edge(1,2) apos alteracao? " << (graph.has_edge(1, 2) ? "SIM" : "NAO") << endl;
+    cout << "Verificando se tem aresta apos a alteracao: " << (graph.has_edge(1, 2) ? "SIM" : "NAO") << endl;
     cout << "Tentativa de alterar peso de aresta inexistente 2->1 (deve falhar): ";
-    if (!graph.set_edge_weight(2, 1, 50))
-        cout << "FALHA (correto - aresta nao existe)\n";
+    graph.set_edge_weight(2, 1, 50);
 
-    // 6. Calcular grau de um vértice
     cout << "\n--- Teste: calcular grau de um vértice ---\n";
     cout << "Grau do vertice 1: " << graph.degree(1) << " (esperado: 2 - arestas 1->2 e 1->3)\n";
     cout << "Grau do vertice 4: " << graph.degree(4) << " (esperado: 2 - arestas 2->4 e 3->4)\n";
     cout << "Grau do vertice 5: " << graph.degree(5) << " (esperado: 1 - aresta 4->5)\n";
     cout << "Grau do vertice 99 (inexistente): " << graph.degree(99) << " (deve retornar -1)\n";
 
-    // 7. Listar vizinhos de um vértice
     cout << "\n--- Teste: obter vizinhos de um vértice ---\n";
     vector<int> vizinhos1 = graph.get_neighbors(1);
     cout << "Vizinhos do vertice 1: ";
@@ -158,65 +150,42 @@ void test_all()
         cout << v << " ";
     cout << "(esperado: lista vazia)\n";
 
-    // 8. Verificar adjacência
     cout << "\n--- Teste: verificar adjacência ---\n";
     cout << "1 e 2 sao adjacentes? " << (graph.are_adjacent(1, 2) ? "SIM" : "NAO") << " (esperado: SIM - aresta 1->2 existe)\n";
-    cout << "2 e 1 sao adjacentes? " << (graph.are_adjacent(2, 1) ? "SIM" : "NAO") << " (esperado: NAO - direcionado)\n";
+    cout << "2 e 1 sao adjacentes? " << (graph.are_adjacent(2, 1) ? "SIM" : "NAO") << " (esperado: NAO - aresta 2->1 nao existe)\n";
     cout << "4 e 5 sao adjacentes? " << (graph.are_adjacent(4, 5) ? "SIM" : "NAO") << " (esperado: SIM - aresta 4->5 existe)\n";
 
-    // 9. Componentes conexas
     cout << "\n--- Teste: componentes conexas ---\n";
     cout << "Componentes conexas do grafo atual:\n";
     graph.print_connected_components();
 
-    // 10. Remover aresta
     cout << "\n--- Teste: remover aresta ---\n";
-    cout << "Removendo aresta 1->3...\n";
+    cout << "Removendo aresta 1->3\n";
     graph.remove_edge(1, 3);
     cout << "Existe aresta 1->3 apos remocao? " << (graph.has_edge(1, 3) ? "SIM (erro!)" : "NAO (correto)") << endl;
     cout << "Tentativa de remover aresta inexistente 1->3 novamente (deve falhar): ";
-    if (!graph.remove_edge(1, 3))
-        cout << "FALHA (correto - aresta nao existe mais)\n";
+    graph.remove_edge(1, 3);
 
-    // Grafo apos remocao
     cout << "\n--- Grafo apos remocao da aresta 1->3 ---\n";
     graph.print();
 
-    // 11. Remover vértice
     cout << "\n--- Teste: remover vértice ---\n";
-    cout << "Removendo vertice 5...\n";
+    cout << "Removendo vertice 5\n";
     graph.remove_vertex(5);
     cout << "Existe aresta 4->5 apos remocao do vertice 5? " << (graph.has_edge(4, 5) ? "SIM (erro!)" : "NAO (correto)") << endl;
     cout << "Grau do vertice 4 apos remocao: " << graph.degree(4) << " (esperado: 2 - so restam 2->4 e 3->4)\n";
     cout << "Tentativa de remover vertice 99 (inexistente): ";
-    if (!graph.remove_vertex(99))
-        cout << "FALHA (correto - vertice nao existe)\n";
+    graph.remove_vertex(99);
 
-    // Grafo final
     cout << "\n--- Grafo final ---\n";
     graph.print();
 
-    // Componentes conexas finais
     cout << "\n--- Componentes conexas finais ---\n";
     graph.print_connected_components();
 
     cout << "\n============================================\n";
     cout << "               TESTE CONCLUIDO!             \n";
     cout << "============================================\n";
-}
-
-int main(int argc, char *argv[])
-{
-    // Configuração inicial do grafo
-    auto [directed, weighted] = configure_graph();
-
-    // Cria o grafo com as configurações
-    Graph graph(directed, weighted);
-
-    initial_menu(graph);
-    main_menu(graph);
-
-    return 0;
 }
 
 void main_menu(Graph &graph)
@@ -434,3 +403,16 @@ void main_menu(Graph &graph)
     } while (true);
 }
 
+int main(int argc, char *argv[])
+{
+    // Configuração inicial do grafo
+    auto [directed, weighted] = configure_graph();
+
+    // Cria o grafo com as configurações
+    Graph graph(directed, weighted);
+
+    initial_menu(graph);
+    main_menu(graph);
+
+    return 0;
+}
