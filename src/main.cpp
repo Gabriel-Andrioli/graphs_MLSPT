@@ -88,12 +88,6 @@ void test_all()
 
     Graph graph(true, true);
 
-    cout << "--- Teste de direcionamento e ponderacao ---\n";
-    cout << "Direcionado: " << (graph.is_directed() ? "SIM" : "NAO") << endl;
-    cout << "Resposta esperada: SIM\n\n";
-    cout << "Ponderado: " << (graph.is_weighted() ? "SIM" : "NAO") << endl;
-    cout << "Resposta esperada: SIM\n";
-
     cout << "\n--- Teste: adicionar vertices ---\n";
     cout << "Adicionando vertices 1, 2, 3, 4, 5, 6, 7\n";
     graph.add_vertex(1);

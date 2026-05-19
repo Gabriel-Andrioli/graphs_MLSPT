@@ -435,11 +435,24 @@ bool Graph::readFromFile(const string &filename)
         // Tenta ler o segundo número
         if (ss >> v)
         {
-            // Linha contém dois números: aresta u -> v
-            // Adiciona aresta (considera o grafo direcionado ou não)
-            if (!add_edge(u, v))
+            // Linha contém dois ou três números: aresta u -> v (com peso opcional)
+            int w;
+            if (weighted && (ss >> w))
             {
-                cerr << "Aviso: Não foi possível adicionar aresta " << u << " -> " << v << endl;
+                // Linha contém três números: aresta u -> v com peso w
+                if (!add_edge(u, v, w))
+                {
+                    cerr << "Aviso: Não foi possível adicionar aresta " << u << " -> " << v
+                         << " (peso " << w << ")" << endl;
+                }
+            }
+            else
+            {
+                // Linha contém dois números: aresta sem peso explícito
+                if (!add_edge(u, v))
+                {
+                    cerr << "Aviso: Não foi possível adicionar aresta " << u << " -> " << v << endl;
+                }
             }
         }
         else
