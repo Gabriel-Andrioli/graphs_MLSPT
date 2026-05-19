@@ -83,7 +83,7 @@ void initial_menu(Graph &graph)
 void test_all()
 {
     cout << "\n============================================\n";
-    cout << "   TESTE DE TODAS AS FUNCIONALIDADES\n";
+    cout << "      TESTE DE TODAS AS FUNCIONALIDADES\n";
     cout << "============================================\n\n";
 
     Graph graph(true, true);
