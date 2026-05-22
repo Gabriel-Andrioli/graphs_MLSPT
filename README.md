@@ -39,7 +39,9 @@ cmake --build .
 ```
 
 ## Passo 3 - Executar
-Procure o executável `GraphsConnectedComponents` na pasta `build` e execute-o. 
+Procure o executável `GraphsConnectedComponents` na pasta `build` e execute-o para rodar o programa com menu interativo.
+
+Procure o executável `testAll` na pasta `build` e execute-o para rodar os testes de unidade padronizados para o trabalho.
 
 ### Linux (ou DevContainer)
 ```bash

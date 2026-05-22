@@ -20,12 +20,12 @@ Graph::Graph(bool directed, bool weighted)
 }
 
 // Getters para directed e weighted
-bool Graph::is_directed() const
+bool Graph::is_directed()
 {
     return directed;
 }
 
-bool Graph::is_weighted() const
+bool Graph::is_weighted()
 {
     return weighted;
 }
@@ -124,7 +124,7 @@ bool Graph::remove_vertex(int id)
     return true;
 }
 
-bool Graph::add_edge(int u, int v, int weight)
+bool Graph::add_edge(int u, int v, float weight)
 {
     // localiza os nós pelos ids usando find_node
     Node *node_u = find_node(u);
@@ -194,7 +194,7 @@ bool Graph::has_edge(int u, int v)
     return find_neighbor_index(u, v) != -1;
 }
 
-bool Graph::set_edge_weight(int u, int v, int weight)
+bool Graph::set_edge_weight(int u, int v, float weight)
 {
     if (!this->weighted)
     {
@@ -243,27 +243,29 @@ void Graph::print()
         return;
     }
 
-    cout << (directed ? "Grafo Direcionado" : "Grafo Nao Direcionado");
-    if (weighted)
-        cout << " (ponderado)";
-    cout << "\n";
-
+    // Primeiro: imprime todos os vertices, um por linha
     for (Node *node : nodes)
     {
-        cout << node->id << ": ";
-        for (size_t i = 0; i < node->neighbors.size(); i++)
+        cout << node->id << "\n";
+    }
+
+    // Depois: imprime todas as arestas, uma por linha
+    //   2 elementos (u v) para grafos nao ponderados
+    //   3 elementos (u v w) para grafos ponderados
+    for (Node *node : nodes)
+    {
+        for (Edge &edge : node->neighbors)
         {
+            // Para grafos nao direcionados, imprime cada aresta uma unica vez
+            // (apenas quando node->id < edge.target->id, evitando o par inverso)
+            if (!directed && node->id >= edge.target->id)
+                continue;
+
             if (weighted)
-            {
-                cout << node->neighbors[i].target->id
-                     << "(P:" << node->neighbors[i].weight << ") ";
-            }
+                cout << node->id << " " << edge.target->id << " " << edge.weight << "\n";
             else
-            {
-                cout << node->neighbors[i].target->id << " ";
-            }
+                cout << node->id << " " << edge.target->id << "\n";
         }
-        cout << "\n";
     }
 }
 
@@ -271,7 +273,7 @@ int Graph::degree(int id)
 {
     Node *n = find_node(id);
     if (!n)
-        return -1; // vertice nao encontrado
+        return 0; // vertice nao encontrado
     if (directed)
         return n->in_degree + n->out_degree;
     else

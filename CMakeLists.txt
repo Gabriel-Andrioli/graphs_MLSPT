@@ -10,6 +10,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 include_directories(include)
 
-file(GLOB_RECURSE SOURCES "src/*.cpp")
+set(GRAPH_SOURCES src/graph.cpp)
 
-add_executable(GraphsConnectedComponents ${SOURCES})
+add_executable(GraphsConnectedComponents src/main.cpp ${GRAPH_SOURCES})
+
+add_executable(testAll src/testall.cpp ${GRAPH_SOURCES})

@@ -16,8 +16,8 @@ class Node;
 struct Edge
 {
     Node *target;
-    int weight;
-    Edge(Node *target, int weight)
+    float weight;
+    Edge(Node *target, float weight)
     {
         this->target = target;
         this->weight = weight;
@@ -50,16 +50,16 @@ public:
     ~Graph();
 
     // Getters para directed e weighted
-    bool is_directed() const;
-    bool is_weighted() const;
+    bool is_directed();
+    bool is_weighted();
 
-    int add_vertex(int id);                         // 1. Inserir vértice
-    bool remove_vertex(int id);                     // 2. Remover vértice
-    bool add_edge(int u, int v, int weight = 1);    // 3. Inserir aresta
-    bool remove_edge(int u, int v);                 // 4. Remover aresta
-    bool has_edge(int u, int v);                    // 5. Verificar existência de aresta
-    bool set_edge_weight(int u, int v, int weight); // 6. Alterar peso de uma aresta
-    void print();                                   // 7. Exibir o grafo
+    int add_vertex(int id);                           // 1. Inserir vértice
+    bool remove_vertex(int id);                       // 2. Remover vértice
+    bool add_edge(int u, int v, float weight = 1);    // 3. Inserir aresta
+    bool remove_edge(int u, int v);                   // 4. Remover aresta
+    bool has_edge(int u, int v);                      // 5. Verificar existência de aresta
+    bool set_edge_weight(int u, int v, float weight); // 6. Alterar peso de uma aresta
+    void print();                                     // 7. Exibir o grafo
 
     int degree(int id);                // 8. Calcular grau de um vértice
     vector<int> get_neighbors(int id); // 9. Listar vizinhos de um vértice
