@@ -30,6 +30,7 @@ bool Graph::is_weighted()
     return weighted;
 }
 
+// Retorna ponteiro para nó a partir do id
 Node *Graph::find_node(int id)
 {
     auto it = node_map.find(id);
@@ -47,6 +48,7 @@ Graph::~Graph()
     node_map.clear(); // limpa o mapa
 }
 
+// Limpa o flag de visitado de todos os nós
 void Graph::clear_visited()
 {
     for (Node *node : nodes)
@@ -55,6 +57,7 @@ void Graph::clear_visited()
     }
 }
 
+// Procura indice de um nó na lista de adjacência de outro, informando sua posição/indice na lista
 int Graph::find_neighbor_index(int u, int v)
 {
     Node *node_u = find_node(u);
@@ -299,11 +302,13 @@ bool Graph::are_adjacent(int u, int v)
     return has_edge(u, v);
 }
 
+// Funçao recursiva auxiliar para componentes conexas
+// Busca em profundidade
 void Graph::dfs_collect(Node *node, vector<int> &component,
                         const vector<vector<int>> &ghostNodeNeighbors,
                         const unordered_map<int, int> &node_index)
 {
-    node->visited = true;
+    node->visited = true; //
     component.push_back(node->id);
 
     // Percorre vizinhos diretos (arestas forward)

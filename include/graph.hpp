@@ -27,7 +27,7 @@ struct Edge
 class Node
 {
 public:
-    int id;
+    int id;                 // id do nó
     bool visited;           // flag de visitado
     int in_degree;          // grau de entrada
     int out_degree;         // grau de saida
