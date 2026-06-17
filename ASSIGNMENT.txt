@@ -1,60 +1,141 @@
-DCC059 :: Teoria dos Grafos
-Trabalho Prático 1
-Objetivo
-O objetivo deste trabalho é implementar estruturas de representação de grafos e algoritmos básicos de Teoria dos Grafos, analisando como diferentes escolhas de estruturas de dados impactam a implementação e a eficiência. O trabalho deverá ser desenvolvido em grupo com até 4 alunos.
-Cada grupo receberá:
-1. Uma estrutura de dados para representação do grafo;
-2. Um conjunto específico de algoritmos para implementar.
+Motiva ̧c ̃ao
+Durante a disciplina de grafos, foram apresentados os principais conceitos e algoritmos de
+Teoria dos Grafos. Os algoritmos estudados em sala (Prim, Kruskal, Dijkstra, Floyd, por
+exemplo) s ̃ao amplamente conhecidos por serem capazes de fornecer, de forma eficiente,
+uma solu ̧c ̃ao exata para os respectivos problemas.
 
-Além disso, todos os grupos deverão implementar um conjunto comum de operações básicas de manipulação de grafos.
-Parte 1 – Representação do Grafo
-Cada grupo deverá implementar um TAD (Tipo Abstrato de Dados) para grafos utilizando a estrutura de dados designada.
+Entretanto, muitos problemas envolvendo grafos s ̃ao problemas de Otimiza ̧c ̃ao Com-
+binat ́oria considerados intrat ́aveis, isto  ́e, problemas para os quais n ̃ao s ̃ao conhecidos
 
-Sua estrutura de dados designada: Lista de Adjacência
+algoritmos capazes de encontrar solu ̧c ̃ao  ́otima em tempo polinominal. Estes problemas
+s ̃ao frequentemente resolvidos por algoritmos heur ́ısticos, que tˆem como objetivo encontrar
+boas solu ̧c ̃oes de forma r ́apida.
+Neste trabalho, os alunos dever ̃ao desenvolver um projeto de programa ̧c ̃ao relacionado
+a um problema intrat ́avel de Otimiza ̧c ̃ao Combinat ́oria. Al ́em de colocar em pr ́atica
+os conhecimentos adquiridos na disciplina, os alunos precisar ̃ao organizar, comparar e
+analisar os resultados obtidos para diferentes instˆancias do problema, fornecendo um
+relat ́orio detalhado do projeto.
+Objetivos
 
-O grafo deve suportar ser:
-• orientado ou não orientado;
-• ponderado ou não ponderado.
-A implementação deve permitir configurar essas características.
+O objetivo geral deste trabalho  ́e que cada grupo de alunos desenvolva um projeto de im-
+plementa ̧c ̃ao para resolver heuristicamente um problema cl ́assico de grafos. Espera-se que
 
-Parte 2 – Operações Obrigatórias
-Deverão ser implementadas as seguintes operações:
-Manipulação do grafo
-1. Inserir vértice;
-2. Remover vértice;
-3. Inserir aresta;
-4. Remover aresta;
-5. Verificar existência de aresta;
-6. Alterar peso de uma aresta;
-7. Exibir o grafo.
-Informações sobre vértices
-1. Calcular grau de um vértice;
-2. Listar vizinhos de um vértice;
-3. Verificar se dois vértices são adjacentes;
-A implementação deve incluir uma função chamada testAll que teste cada uma destas operações obrigatórias.
+os alunos, al ́em da implementa ̧c ̃ao, trabalhem na execu ̧c ̃ao e compara ̧c ̃ao de experimentos,
+an ́alise de resultados de algoritmos e na confec ̧c ̃ao de um relat ́orio sobre o projeto.
+Desenvolvimento do trabalho
+O trabalho requer uma implementa ̧c ̃ao, um relat ́orio de desenvolvimento e a apresenta ̧c ̃ao
+do trabalho. Cada um destes itens  ́e detalhado a seguir.
+Projeto de implementa ̧c ̃ao
+O projeto de implementa ̧c ̃ao dever ́a ser desenvolvido na linguagem C++ e dever ́a
+incluir:
 
-Parte 3 – Algoritmos
-Além das operações obrigatórias, cada grupo deverá implementar um conjunto
-específico de algoritmos.
+• um tipo abstrato de dados Grafo, armazenando n ́os e arestas/arcos em uma estru-
+tura de dados de sua escolha, de forma a assegurar que represente grafos conforme
 
-Seu conjunto de algoritmos: Problema de Componentes conexas
+sejam definidas as instˆancias do problema (direcionados/n ̃ao direcionados, ponde-
+rados nas arestas, ponderados nos v ́ertices, etc);
 
-Requisitos da Implementação
-Linguagem
-O trabalho deve ser implementado em C++
+• gera ̧c ̃ao de semente de randomiza ̧c ̃ao baseada em data/hora (chamada uma  ́unica
+vez em todo o c ́odigo) e impress ̃ao desta para que seja poss ́ıvel repetir um teste
 
-Requisitos mínimos
-O trabalho deve:
-• possuir modularização adequada;
-• utilizar funções/métodos bem definidos;
-• possuir comentários no código;
-• evitar repetição desnecessária de código;
-• permitir testes com diferentes grafos.
+espec ́ıfico, caso necess ́ario (tamb ́em  ́e interessante permitir que a semente seja in-
+formada como um parˆametro de execu ̧c ̃ao);
 
-Entrada e Saída
-O programa deverá permitir:
-• carregar grafos a partir de arquivo;
-• editar grafo de entrada;
-• exibir resultados de forma organizada.
-Formato sugerido para arquivo
-Formato adotado pelo editor https://csacademy.com/app/graph_editor/
+1
+
+• leitura dos dados de arquivo, em formato padr ̃ao das instˆancias do problema na
+literatura;
+• um algoritmo guloso para o problema;
+• um algoritmo guloso randomizado, em que o valor α e o n ́umero de itera ̧c ̃oes sejam
+parˆametros;
+• um algoritmo guloso randomizado reativo, em que os valores de α, o n ́umero de
+itera ̧c ̃oes e o tamanho dos blocos sejam parˆametros;
+
+• impress ̃ao da solu ̧c ̃ao (em arquivo ou na tela) preferencialmente em formato que faci-
+lite sua visualiza ̧c ̃ao (permitindo copiar e colar em http://csacademy.com/app/grapheditor/,
+
+por exemplo).
+Para facilitar a organiza ̧c ̃ao dos resultados obtidos, sugere-se que, no final da execu ̧c ̃ao
+de cada algoritmo, o c ́odigo acrescente uma linha em um arquivo ’.csv’ contendo os dados
+da execu ̧c ̃ao. Neste caso, o ideal  ́e que os dados incluam:
+• data/hora do teste,
+• instˆancia,
+• eventuais parˆametros do teste, dependendo do problema (capacidades, limites m ́aximos,
+cardinalidade m ́axima, etc),
+• algoritmo executado no teste,
+• parˆametros do algoritmo (por exemplo: α, n ́umero de itera ̧c ̃oes, tamanho do bloco),
+• semente de randomiza ̧c ̃ao,
+• tempo gasto na execu ̧c ̃ao,
+• valor da melhor solu ̧c ̃ao alcan ̧cada.
+Embora nem todos os algoritmos apresentem todos esses dados, construir uma tabela
+ ́unica (onde algumas colunas podem estar vazias nas linhas correspondentes ao guloso, por
+exemplo) ajuda bastante na hora de consolidar os resultados. Al ́em dos dados listados, o
+α que forneceu a melhor solu ̧c ̃ao do algoritmo reativo e a m ́edia dos valores das solu ̧c ̃oes
+obtidas em todas as itera ̧c ̃oes dos algoritmos randomizados, por exemplo, tamb ́em podem
+gerar resultados interessantes no final.
+Tanto a corretude da implementa ̧c ̃ao quanto a organiza ̧c ̃ao e clareza do c ́odigo ser ̃ao
+
+avaliadas. Estejam `a vontade para criar classes auxiliares e fun ̧c ̃oes adicionais que con-
+tribuam para um c ́odigo bem estruturado, organizado e de f ́acil compreens ̃ao. O c ́odigo
+
+deve estar compilando e executando (se n ̃ao compilar, a nota  ́e zero).
+Ser ́a inclu ́ıda uma atividade no Classroom para que os alunos incluam o link do git
+onde o c ́odigo estar ́a dispon ́ıvel. No diret ́orio raiz do git, insira um arquivo ‘.txt’ com
+uma descri ̧c ̃ao m ́ınima de como executar o programa via linha de comando (em ambiente
+Linux), informando como executar cada algoritmo (linha de comando e parˆametros).
+
+2
+
+Experimentos e Relat ́orio
+Para os experimentos, cada grupo pode escolher trˆes valores de alfa, de acordo com o
+que for mais adequado para o seu algoritmo. Os valores apresentados no documento s ̃ao
+apenas exemplos ilustrativos.
+Os algoritmos devem ser executados 10 vezes para cada instˆancia (cada vez com uma
+
+semente diferente), registrando ao menos a melhor solu ̧c ̃ao e o tempo m ́edio de proces-
+samento (em segundos). No algoritmo randomizado, o algoritmo construtivo deve ser
+
+chamado pelo menos 30 vezes. No algoritmo randomizado reativo, o construtivo deve
+ser chamado pelo menos 300 vezes, com blocos de 30 a 50 itera ̧c ̃oes para possibilitar a
+atualiza ̧c ̃ao das probabilidades.
+No relat ́orio, devem ser inseridas no m ́ınimo as seguintes tabelas de resultados:
+• Desvios percentuais relativos `as melhores solu ̧c ̃oes obtidas em cada algoritmo para
+cada instˆancia (comparadas `a melhor solu ̧c ̃ao conhecida da respectiva instˆancia).
+Observe que este resultado corresponde ao melhor resultado alcan ̧cado em uma das
+10 execu ̧c ̃oes.
+• Desvios percentuais relativos `a m ́edia da melhor solu ̧c ̃ao obtida em cada execu ̧c ̃ao
+
+do algoritmo para cada instˆancia (comparadas `a melhor solu ̧c ̃ao conhecida da res-
+pectiva instˆancia). Aqui, ser ́a utilizada a m ́edia do resultado das 10 execu ̧c ̃oes.
+
+• O tempo m ́edio das 10 execu ̧c ̃oes de cada algoritmo.
+No Classroom, foi disponibilizada uma planilha para ajudar no c ́alculo das tabelas de
+desvio percentual. Preenchendo os dados obtidos, a tabela calcula os desvios percentuais
+e formata as linhas para colar no latex.
+O relat ́orio do trabalho dever ́a seguir o modelo disponibilizado no Classroom. O
+referido modelo especifica o que deve ser fazer parte do relat ́orio, incluindo exemplos de
+como algoritmos e tabelas devem ser inseridos. O relat ́orio deve conter at ́e 10 p ́aginas
+(sem contabilizar capa, sum ́ario e bibliografia) e NAO ̃ deve conter c ́odigo fonte.
+
+
+B) Problema da Árvore Geradora com Número Mínimo de
+Rótulos (Minimum Labeling Spanning Tree Problem – MLSTP)
+Seja G = V E um grafo conexo não direcionado. Cada aresta
+e ∈ Eestá associada a um rótulo pertencente a um conjunto L,
+representado por uma função
+
+l: E → L.
+
+O objetivo é encontrar uma árvore geradora T = V ET que
+conecte todos os vértices do grafo utilizando o menor número
+possível de rótulos distintos.
+
+Formalmente, deseja-se minimizar
+∣ l e : e ∈ ET ∣,
+
+sujeito à condição de que Tseja uma árvore geradora de G.
+
+Esse problema surge em aplicações como projetos de redes de
+comunicação, onde cada rótulo pode representar uma
+tecnologia, um provedor ou um tipo de conexão, e deseja-se
+minimizar a diversidade de recursos utilizados.
