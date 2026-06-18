@@ -40,22 +40,18 @@ cmake --build .
 
 ## Passo 3 - Executar
 Primeiro, entre na pasta build.
-Procure o executável `GraphsConnectedComponents` e execute-o para rodar o programa com menu interativo.
-
-Procure o executável `testAll` e execute-o para rodar os testes de unidade padronizados para o trabalho.
+Procure o executável `MLSTP` e execute-o para rodar o programa com menu interativo.
 
 ### Linux (ou DevContainer)
 ```bash
 cd build
-./testAll
-./GraphsConnectedComponents
+./MLSTP
 ```
 
 ### Windows
 ```cmd
 cd build
-.\testAll.exe
-.\GraphsConnectedComponents.exe
+.\MLSTP.exe
 ```
 
 ## Estrutura do Projeto
