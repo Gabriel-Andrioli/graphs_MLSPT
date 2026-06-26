@@ -1,6 +1,7 @@
 #include <iostream>
 #include <limits>
 #include "graph.hpp"
+#include "random_manager.hpp"
 
 using namespace std;
 
@@ -253,6 +254,9 @@ void main_menu(Graph &graph)
 
 int main(int argc, char *argv[])
 {
+    // Inicializa a semente global uma única vez
+    RandomManager::initialize(argc, argv);
+
     // Cria o grafo simplificado para o MLSTP
     Graph graph;
 

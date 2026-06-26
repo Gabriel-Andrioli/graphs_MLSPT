@@ -45,3 +45,6 @@ Thumbs.db
 # My Dev Container
 .devcontainer/
 plans/
+
+# Data
+/data
