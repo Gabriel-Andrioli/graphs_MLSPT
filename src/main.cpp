@@ -2,6 +2,7 @@
 #include <limits>
 #include "graph.hpp"
 #include "random_manager.hpp"
+#include "solver.hpp"
 
 using namespace std;
 
@@ -71,6 +72,9 @@ void main_menu(Graph &graph)
         cout << "8 - Listar vizinhos de um vertice\n";
         cout << "9 - Verificar se dois vertices sao adjacentes\n";
         cout << "V - Obter quantidade de vertices\n";
+        cout << "F - Obter frequencias globais de rotulos\n";
+        cout << "M - Verificar se um vertice e mono-rotulo (mono-label)\n";
+        cout << "P - Testar Fase 1 (Pre-processamento) do Solver\n";
         cout << "X - Sair\n";
         cout << "Escolha: ";
         cin >> option;
@@ -239,6 +243,114 @@ void main_menu(Graph &graph)
         else if (option == 'V' || option == 'v')
         {
             cout << "Quantidade total de vertices: " << graph.get_vertices_count() << endl;
+        }
+        else if (option == 'F' || option == 'f')
+        {
+            cout << "Frequencias globais de rotulos:\n";
+            const auto& freqs = graph.get_label_frequencies();
+            if (freqs.empty())
+            {
+                cout << "(nenhum rotulo registrado)\n";
+            }
+            else
+            {
+                for (const auto& pair : freqs)
+                {
+                    cout << "  Rotulo " << pair.first << ": " << pair.second << " ocorrencia(s)\n";
+                }
+            }
+        }
+        else if (option == 'M' || option == 'm')
+        {
+            int id;
+            cout << "ID do vertice: ";
+            cin >> id;
+
+            if (graph.is_vertex_mono_label(id))
+            {
+                cout << "O vertice " << id << " e mono-rotulo (mono-label)!\n";
+            }
+            else
+            {
+                cout << "O vertice " << id << " NAO e mono-rotulo.\n";
+            }
+        }
+        else if (option == 'P' || option == 'p')
+        {
+            cout << "\n=== EXECUCAO DO SOLVER (FASE 1 E FASE 2) ===\n";
+            MLSPTSolver solver(graph);
+            solver.solve(); // Executa Pré-processamento e Inicialização
+            
+            cout << "\n--- FASE 1: ELEMENTOS INCONTORNAVEIS ---\n";
+            cout << "Arestas Incontornaveis encontradas:\n";
+            const auto& edges = solver.get_unavoidable_edges();
+            if (edges.empty())
+            {
+                cout << "  (nenhuma aresta incontornavel)\n";
+            }
+            else
+            {
+                for (const auto& edge : edges)
+                {
+                    cout << "  Aresta: " << edge.first << " - " << edge.second 
+                         << " (rotulo: " << graph.get_edge_label(edge.first, edge.second) << ")\n";
+                }
+            }
+
+            cout << "Rotulos Incontornaveis encontrados:\n";
+            const auto& labels = solver.get_unavoidable_labels();
+            if (labels.empty())
+            {
+                cout << "  (nenhum rotulo incontornavel)\n";
+            }
+            else
+            {
+                for (int label : labels)
+                {
+                    cout << "  Rotulo: " << label << "\n";
+                }
+            }
+
+            cout << "\n--- FASES 2, 3 e 4: RESULTADO FINAL DA SOLUCAO ---\n";
+            cout << "Arestas na Arvore Geradora final (S):\n";
+            const auto& sel_edges = solver.get_selected_edges();
+            if (sel_edges.empty())
+            {
+                cout << "  (solucao vazia)\n";
+            }
+            else
+            {
+                for (const auto& edge : sel_edges)
+                {
+                    cout << "  Aresta: " << edge.first << " - " << edge.second 
+                         << " (rotulo: " << graph.get_edge_label(edge.first, edge.second) << ")\n";
+                }
+            }
+
+            cout << "Vertices em Visitados (" << solver.get_visited_vertices().size() << "):\n  ";
+            const auto& visited = solver.get_visited_vertices();
+            for (int v : visited)
+            {
+                cout << v << " ";
+            }
+            cout << "\n";
+
+            cout << "Custo da Solucao (tamanho de Usados): " << solver.get_used_labels().size() << "\n";
+            cout << "Rotulos em Usados:\n  ";
+            const auto& used = solver.get_used_labels();
+            for (int l : used)
+            {
+                cout << l << " ";
+            }
+            cout << "\n";
+
+            cout << "Fila de Prioridades de Rotulos (Ordenada):\n  ";
+            const auto& pq = solver.get_label_priority_queue();
+            for (int l : pq)
+            {
+                cout << l << " ";
+            }
+            cout << "\n============================================\n";
         }
         else if (option == 'X')
         {

@@ -11,6 +11,11 @@ Node::Node(int id)
     this->visited = false;
 }
 
+bool Node::is_mono_label() const
+{
+    return label_counts.size() == 1;
+}
+
 Graph::Graph()
 {
 }
@@ -73,39 +78,53 @@ int Graph::add_vertex(int id)
 
 bool Graph::remove_vertex(int id)
 {
-    Node *target = nullptr;
+    Node *target = find_node(id);
+    if (!target)
+        return false;
+
+    // Para cada vizinho do nó a ser removido, removemos a aresta reversa e atualizamos as estatísticas
+    for (const Edge &e : target->neighbors)
+    {
+        Node *neighbor = e.target;
+        int label = e.label;
+
+        // Decrementa contadores locais do vizinho
+        neighbor->label_counts[label]--;
+        if (neighbor->label_counts[label] == 0)
+        {
+            neighbor->label_counts.erase(label);
+        }
+
+        // Decrementa a recorrência global
+        label_frequencies[label]--;
+        if (label_frequencies[label] == 0)
+        {
+            label_frequencies.erase(label);
+        }
+
+        // Remove a aresta do vizinho que aponta para o nó deletado
+        for (int j = (int)neighbor->neighbors.size() - 1; j >= 0; j--)
+        {
+            if (neighbor->neighbors[j].target->id == id)
+            {
+                neighbor->neighbors.erase(neighbor->neighbors.begin() + j);
+            }
+        }
+    }
+
+    // Localiza e remove o nó do vetor nodes
     int i;
     for (i = 0; i < (int)nodes.size(); i++)
     {
         if (nodes[i]->id == id)
         {
-            target = nodes[i];
             break;
         }
     }
-    if (!target)
-        return false;
-
-    // remove arestas que apontam para este no em todos os outros nos
-    for (Node *n : nodes)
-    {
-        if (n->id == id) // propria lista do no que será removido
-            continue;
-
-        for (int j = (int)n->neighbors.size() - 1; j >= 0; j--)
-        {
-            if (n->neighbors[j].target->id == id)
-            {
-                n->neighbors.erase(n->neighbors.begin() + j);
-            }
-        }
-    }
-
-    // deleta o no e remove do vetor
     delete target;
     nodes.erase(nodes.begin() + i);
+    node_map.erase(id);
 
-    node_map.erase(id); // remove do mapa
     return true;
 }
 
@@ -125,6 +144,13 @@ bool Graph::add_edge(int u, int v, int label)
     node_u->neighbors.push_back(Edge(node_v, label));
     node_v->neighbors.push_back(Edge(node_u, label));
 
+    // Atualiza contadores locais dos nós
+    node_u->label_counts[label]++;
+    node_v->label_counts[label]++;
+
+    // Atualiza contadores globais do grafo
+    label_frequencies[label]++;
+
     return true;
 }
 
@@ -140,6 +166,8 @@ bool Graph::remove_edge(int u, int v)
     if (index_uv == -1)
         return false; // não existe aresta entre os nos
 
+    int label = node_u->neighbors[index_uv].label;
+
     // remove u -> v
     node_u->neighbors.erase(node_u->neighbors.begin() + index_uv);
 
@@ -149,6 +177,20 @@ bool Graph::remove_edge(int u, int v)
     {
         node_v->neighbors.erase(node_v->neighbors.begin() + index_vu);
     }
+
+    // Decrementa contadores locais
+    node_u->label_counts[label]--;
+    if (node_u->label_counts[label] == 0)
+        node_u->label_counts.erase(label);
+
+    node_v->label_counts[label]--;
+    if (node_v->label_counts[label] == 0)
+        node_v->label_counts.erase(label);
+
+    // Decrementa contador global
+    label_frequencies[label]--;
+    if (label_frequencies[label] == 0)
+        label_frequencies.erase(label);
 
     return true;
 }
@@ -301,4 +343,25 @@ bool Graph::readFromFile(const string &filename)
 
     file.close();
     return true;
+}
+
+int Graph::get_label_frequency(int label) const
+{
+    auto it = label_frequencies.find(label);
+    if (it != label_frequencies.end())
+        return it->second;
+    return 0;
+}
+
+const unordered_map<int, int>& Graph::get_label_frequencies() const
+{
+    return label_frequencies;
+}
+
+bool Graph::is_vertex_mono_label(int id) const
+{
+    Node *n = find_node(id);
+    if (n)
+        return n->is_mono_label();
+    return false;
 }

@@ -26,8 +26,7 @@ A Fila de Prioridade ordena os rótulos do mais atrativo (início da fila) para 
 ### Fase 1: Pré-processamento
 
 1. **Identificar Arestas Incontornáveis:**
-* Varra os vértices do grafo em busca de vértices de grau 1 (vértices folha que possuem apenas uma aresta conectada a eles).
-* (Temos que pensar ainda se há outros tipos de vértices de caminhos incontornáveis, como aqueles que só usam arestas de um mesmo rótulo).
+* Varra os vértices do grafo em busca de vértices de grau de label 1, vértices mono-label.
 * As arestas que conectam esses vértices são obrigatórias para qualquer árvore geradora válida.
 
 

@@ -26,7 +26,7 @@ struct GeneratedEdge {
     int v;
     int label;
 };
-
+    
 // Gera um grafo conexo rotulado e salva no caminho especificado
 void generate_instance(int n, int l, int m, const string &filepath)
 {
