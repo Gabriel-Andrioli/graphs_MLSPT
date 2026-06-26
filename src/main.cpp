@@ -4,34 +4,6 @@
 
 using namespace std;
 
-pair<bool, bool> configure_graph()
-{
-    char directed_char, weighted_char;
-    cout << "=== CONFIGURACAO DO GRAFO ===\n";
-
-    do
-    {
-        cout << "Grafo direcionado? (S/N): ";
-        cin >> directed_char;
-    } while (toupper(directed_char) != 'S' && toupper(directed_char) != 'N');
-
-    do
-    {
-        cout << "Grafo ponderado? (S/N): ";
-        cin >> weighted_char;
-    } while (toupper(weighted_char) != 'S' && toupper(weighted_char) != 'N');
-
-    bool directed = (toupper(directed_char) == 'S');
-    bool weighted = (toupper(weighted_char) == 'S');
-
-    cout << "\n--- Configuracao definida ---\n";
-    cout << "Direcionado: " << (directed ? "SIM" : "NAO") << endl;
-    cout << "Ponderado: " << (weighted ? "SIM" : "NAO") << endl;
-    cout << "----------------------------\n";
-
-    return {directed, weighted};
-}
-
 void initial_menu(Graph &graph)
 {
     char option;
@@ -59,13 +31,13 @@ void initial_menu(Graph &graph)
             cin.ignore();
             getline(cin, filename);
 
-            // Remover possíveis espaços e garantir que o arquivo está em graphFiles
-            // Por enquanto, apenas imprimimos que carregaríamos o arquivo
             cout << "Carregando grafo do arquivo graphFiles/" << filename << "...\n";
-            graph.readFromFile(filename);
-            cout << "Grafo carregado com sucesso!\n";
-            cout << "Visao do grafo atualizado com os dados do arquivo:\n";
-            graph.print();
+            if (graph.readFromFile(filename))
+            {
+                cout << "Grafo carregado com sucesso!\n";
+                cout << "Visao do grafo atualizado com os dados do arquivo:\n";
+                graph.print();
+            }
             break;
         }
         else if (option == 'X')
@@ -93,11 +65,11 @@ void main_menu(Graph &graph)
         cout << "3 - Adicionar aresta\n";
         cout << "4 - Remover aresta\n";
         cout << "5 - Verificar existencia de aresta\n";
-        cout << "6 - Alterar peso de aresta (apenas grafos ponderados)\n";
+        cout << "6 - Consultar rotulo de aresta\n";
         cout << "7 - Calcular grau de um vertice\n";
         cout << "8 - Listar vizinhos de um vertice\n";
         cout << "9 - Verificar se dois vertices sao adjacentes\n";
-        cout << "C - Componentes Conexas\n";
+        cout << "V - Obter quantidade de vertices\n";
         cout << "X - Sair\n";
         cout << "Escolha: ";
         cin >> option;
@@ -140,19 +112,15 @@ void main_menu(Graph &graph)
         }
         else if (option == '3')
         {
-            int u, v, weight = 1;
+            int u, v, label = 0;
             cout << "ID do vertice u: ";
             cin >> u;
             cout << "ID do vertice v: ";
             cin >> v;
+            cout << "Rotulo da aresta (padrao=0): ";
+            cin >> label;
 
-            if (graph.is_directed() && graph.is_weighted())
-            {
-                cout << "Peso da aresta (padrao=1): ";
-                cin >> weight;
-            }
-
-            if (graph.add_edge(u, v, weight))
+            if (graph.add_edge(u, v, label))
             {
                 cout << "Aresta adicionada com sucesso!\n";
             }
@@ -197,27 +165,20 @@ void main_menu(Graph &graph)
         }
         else if (option == '6')
         {
-            if (!graph.is_weighted())
-            {
-                cout << "Este grafo nao e ponderado. Operacao nao permitida.\n";
-                continue;
-            }
-
-            int u, v, weight;
+            int u, v;
             cout << "ID do vertice u: ";
             cin >> u;
             cout << "ID do vertice v: ";
             cin >> v;
-            cout << "Novo peso: ";
-            cin >> weight;
 
-            if (graph.set_edge_weight(u, v, weight))
+            int label = graph.get_edge_label(u, v);
+            if (label == -1)
             {
-                cout << "Peso da aresta alterado com sucesso!\n";
+                cout << "Aresta nao existe.\n";
             }
             else
             {
-                cout << "Falha ao alterar peso (aresta nao existe).\n";
+                cout << "O rotulo da aresta entre " << u << " e " << v << " e: " << label << endl;
             }
         }
         else if (option == '7')
@@ -274,9 +235,9 @@ void main_menu(Graph &graph)
                 cout << u << " e " << v << " nao sao adjacentes.\n";
             }
         }
-        else if (option == 'C' || option == 'c')
+        else if (option == 'V' || option == 'v')
         {
-            graph.print_connected_components();
+            cout << "Quantidade total de vertices: " << graph.get_vertices_count() << endl;
         }
         else if (option == 'X')
         {
@@ -292,11 +253,8 @@ void main_menu(Graph &graph)
 
 int main(int argc, char *argv[])
 {
-    // Configuração inicial do grafo
-    auto [directed, weighted] = configure_graph();
-
-    // Cria o grafo com as configurações
-    Graph graph(directed, weighted);
+    // Cria o grafo simplificado para o MLSTP
+    Graph graph;
 
     initial_menu(graph);
     main_menu(graph);

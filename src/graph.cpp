@@ -9,29 +9,14 @@ Node::Node(int id)
 {
     this->id = id;
     this->visited = false;
-    this->in_degree = 0;
-    this->out_degree = 0;
 }
 
-Graph::Graph(bool directed, bool weighted)
+Graph::Graph()
 {
-    this->directed = directed;
-    this->weighted = weighted;
-}
-
-// Getters para directed e weighted
-bool Graph::is_directed()
-{
-    return directed;
-}
-
-bool Graph::is_weighted()
-{
-    return weighted;
 }
 
 // Retorna ponteiro para nó a partir do id
-Node *Graph::find_node(int id)
+Node *Graph::find_node(int id) const
 {
     auto it = node_map.find(id);
     if (it != node_map.end())
@@ -57,14 +42,14 @@ void Graph::clear_visited()
     }
 }
 
-// Procura indice de um nó na lista de adjacência de outro, informando sua posição/indice na lista
-int Graph::find_neighbor_index(int u, int v)
+// Procura indice de um nó na lista de adjacência de outro
+int Graph::find_neighbor_index(int u, int v) const
 {
     Node *node_u = find_node(u);
     if (!node_u)
         return -1; // nó u não existente
 
-    for (int i = 0; i < node_u->neighbors.size(); i++)
+    for (int i = 0; i < (int)node_u->neighbors.size(); i++)
     {
         if (node_u->neighbors[i].target->id == v)
         {
@@ -90,7 +75,7 @@ bool Graph::remove_vertex(int id)
 {
     Node *target = nullptr;
     int i;
-    for (i = 0; i < nodes.size(); i++)
+    for (i = 0; i < (int)nodes.size(); i++)
     {
         if (nodes[i]->id == id)
         {
@@ -112,9 +97,6 @@ bool Graph::remove_vertex(int id)
             if (n->neighbors[j].target->id == id)
             {
                 n->neighbors.erase(n->neighbors.begin() + j);
-                // ajusta graus
-                n->out_degree--;
-                target->in_degree--;
             }
         }
     }
@@ -127,7 +109,7 @@ bool Graph::remove_vertex(int id)
     return true;
 }
 
-bool Graph::add_edge(int u, int v, float weight)
+bool Graph::add_edge(int u, int v, int label)
 {
     // localiza os nós pelos ids usando find_node
     Node *node_u = find_node(u);
@@ -139,23 +121,9 @@ bool Graph::add_edge(int u, int v, float weight)
     if (has_edge(u, v))
         return false;
 
-    if (!this->weighted)
-    {
-        weight = 1;
-    }
-
-    // insere a aresta u -> v
-    node_u->neighbors.push_back(Edge(node_v, weight));
-    node_u->out_degree++;
-    node_v->in_degree++;
-
-    // se nao direcionado, insere tambem v -> u
-    if (!directed)
-    {
-        node_v->neighbors.push_back(Edge(node_u, weight));
-        node_v->out_degree++;
-        node_u->in_degree++;
-    }
+    // insere a aresta u -> v e v -> u (não direcionado)
+    node_u->neighbors.push_back(Edge(node_v, label));
+    node_v->neighbors.push_back(Edge(node_u, label));
 
     return true;
 }
@@ -174,71 +142,23 @@ bool Graph::remove_edge(int u, int v)
 
     // remove u -> v
     node_u->neighbors.erase(node_u->neighbors.begin() + index_uv);
-    node_u->out_degree--;
-    node_v->in_degree--;
 
-    // se nao for direcionado, remove v -> u
-    if (!directed)
+    // remove v -> u (como é não direcionado, deve existir v -> u)
+    int index_vu = find_neighbor_index(v, u);
+    if (index_vu != -1)
     {
-        int index_vu = find_neighbor_index(v, u);
-        if (index_vu != -1)
-        {
-            node_v->neighbors.erase(node_v->neighbors.begin() + index_vu);
-            node_v->out_degree--;
-            node_u->in_degree--;
-        }
+        node_v->neighbors.erase(node_v->neighbors.begin() + index_vu);
     }
 
     return true;
 }
 
-bool Graph::has_edge(int u, int v)
+bool Graph::has_edge(int u, int v) const
 {
     return find_neighbor_index(u, v) != -1;
 }
 
-bool Graph::set_edge_weight(int u, int v, float weight)
-{
-    if (!this->weighted)
-    {
-        cout << "O grafo não é ponderado. Essa operação (set_edge_weight) não é permitida.\n";
-        return false;
-    }
-    int i = find_neighbor_index(u, v);
-    if (i == -1)
-        return false; // não existe aresta entre os nos
-
-    // localiza o no u
-    for (Node *n : nodes)
-    {
-        if (n->id == u)
-        {
-            n->neighbors[i].weight = weight;
-            break;
-        }
-    }
-
-    // se nao direcionado, atualiza tambem o peso da aresta inversa
-    if (!directed)
-    {
-        int i_rev = find_neighbor_index(v, u);
-        if (i_rev != -1)
-        {
-            for (Node *n : nodes)
-            {
-                if (n->id == v)
-                {
-                    n->neighbors[i_rev].weight = weight;
-                    break;
-                }
-            }
-        }
-    }
-
-    return true;
-}
-
-void Graph::print()
+void Graph::print() const
 {
     if (nodes.empty())
     {
@@ -252,44 +172,41 @@ void Graph::print()
         cout << node->id << "\n";
     }
 
-    // Depois: imprime todas as arestas, uma por linha
-    //   2 elementos (u v) para grafos nao ponderados
-    //   3 elementos (u v w) para grafos ponderados
+    // Depois: imprime todas as arestas, uma por linha no formato u v label
     for (Node *node : nodes)
     {
-        for (Edge &edge : node->neighbors)
+        for (const Edge &edge : node->neighbors)
         {
             // Para grafos nao direcionados, imprime cada aresta uma unica vez
             // (apenas quando node->id < edge.target->id, evitando o par inverso)
-            if (!directed && node->id >= edge.target->id)
-                continue;
-
-            if (weighted)
-                cout << node->id << " " << edge.target->id << " " << edge.weight << "\n";
-            else
-                cout << node->id << " " << edge.target->id << "\n";
+            if (node->id < edge.target->id)
+            {
+                cout << node->id << " " << edge.target->id << " " << edge.label << "\n";
+            }
         }
     }
 }
 
-int Graph::degree(int id)
+int Graph::get_vertices_count() const
+{
+    return (int)nodes.size();
+}
+
+int Graph::degree(int id) const
 {
     Node *n = find_node(id);
     if (!n)
-        return 0; // vertice nao encontrado
-    if (directed)
-        return n->in_degree + n->out_degree;
-    else
-        return (int)n->neighbors.size();
+        return -1; // vertice nao encontrado
+    return (int)n->neighbors.size();
 }
 
-vector<int> Graph::get_neighbors(int id)
+vector<int> Graph::get_neighbors(int id) const
 {
     vector<int> result;
     Node *n = find_node(id);
     if (n)
     {
-        for (Edge &e : n->neighbors)
+        for (const Edge &e : n->neighbors)
         {
             result.push_back(e.target->id);
         }
@@ -297,108 +214,18 @@ vector<int> Graph::get_neighbors(int id)
     return result;
 }
 
-bool Graph::are_adjacent(int u, int v)
+bool Graph::are_adjacent(int u, int v) const
 {
     return has_edge(u, v);
 }
 
-// Funçao recursiva auxiliar para componentes conexas
-// Busca em profundidade
-void Graph::dfs_collect(Node *node, vector<int> &component,
-                        const vector<vector<int>> &ghostNodeNeighbors,
-                        const unordered_map<int, int> &node_index)
+int Graph::get_edge_label(int u, int v) const
 {
-    node->visited = true; //
-    component.push_back(node->id);
-
-    // Percorre vizinhos diretos (arestas forward)
-    for (Edge &e : node->neighbors)
-    {
-        if (!e.target->visited)
-        {
-            dfs_collect(e.target, component, ghostNodeNeighbors, node_index);
-        }
-    }
-
-    // Se houver ghostNodeNeighbors (apenas para grafos direcionados),
-    // percorre os vizinhos reversos (arcos que chegam neste no)
-    if (!ghostNodeNeighbors.empty())
-    {
-        int i = node_index.at(node->id);
-        for (int rev_id : ghostNodeNeighbors[i])
-        {
-            Node *rev_node = find_node(rev_id);
-            if (rev_node && !rev_node->visited)
-            {
-                dfs_collect(rev_node, component, ghostNodeNeighbors, node_index);
-            }
-        }
-    }
-}
-
-vector<vector<int>> Graph::connected_components()
-{
-    vector<vector<int>> components;
-    clear_visited();
-
-    // Mapeamento de id do no para indice no vetor nodes (para acesso O(1) ao ghostNodeNeighbors)
-    unordered_map<int, int> node_index;
-    for (int i = 0; i < (int)nodes.size(); i++)
-    {
-        node_index[nodes[i]->id] = i;
-    }
-
-    // Constroi lista de adjacencia invertida apenas para grafos direcionados
-    // ghostNodeNeighbors[v] contem todos os ids u tais que existe arco u -> v
-    vector<vector<int>> ghostNodeNeighbors;
-    if (directed)
-    {
-        ghostNodeNeighbors.resize(nodes.size());
-        for (Node *u : nodes)
-        {
-            for (Edge &e : u->neighbors)
-            {
-                int v_idx = node_index[e.target->id];
-                ghostNodeNeighbors[v_idx].push_back(u->id);
-            }
-        }
-    }
-
-    // Percorre todos os vertices, executando DFS a partir de cada no nao visitado
-    for (Node *node : nodes)
-    {
-        if (!node->visited)
-        {
-            vector<int> component;
-            dfs_collect(node, component, ghostNodeNeighbors, node_index);
-            components.push_back(component);
-        }
-    }
-
-    return components;
-}
-
-void Graph::print_connected_components()
-{
-    vector<vector<int>> components = connected_components();
-
-    cout << "\n====================================\n";
-    cout << "Componentes Conexas\n";
-    cout << "====================================\n";
-    cout << "Total de componentes: " << components.size() << "\n\n";
-
-    for (int i = 0; i < (int)components.size(); i++)
-    {
-        cout << "Componente " << i + 1 << " (tamanho " << components[i].size() << "): ";
-        for (int j = 0; j < (int)components[i].size(); j++)
-        {
-            cout << components[i][j];
-            if (j < (int)components[i].size() - 1)
-                cout << ", ";
-        }
-        cout << "\n";
-    }
-    cout << "====================================\n";
+    int idx = find_neighbor_index(u, v);
+    if (idx == -1)
+        return -1; // aresta não encontrada
+    Node *node_u = find_node(u);
+    return node_u->neighbors[idx].label;
 }
 
 // Leitura de arquivo
@@ -428,7 +255,7 @@ bool Graph::readFromFile(const string &filename)
         line = line.substr(first, (last - first) + 1);
 
         // Verifica se a linha contém apenas um número (vértice)
-        // ou dois números separados por espaço (aresta)
+        // ou dois/três números separados por espaço (aresta)
         stringstream ss(line);
         int u, v = -1;
         ss >> u;
@@ -442,23 +269,23 @@ bool Graph::readFromFile(const string &filename)
         // Tenta ler o segundo número
         if (ss >> v)
         {
-            // Linha contém dois ou três números: aresta u -> v (com peso opcional)
-            int w;
-            if (weighted && (ss >> w))
+            // Linha contém dois ou três números: aresta u - v (com rótulo opcional)
+            int label;
+            if (ss >> label)
             {
-                // Linha contém três números: aresta u -> v com peso w
-                if (!add_edge(u, v, w))
+                // Linha contém três números: aresta u - v com rótulo
+                if (!add_edge(u, v, label))
                 {
-                    cerr << "Aviso: Não foi possível adicionar aresta " << u << " -> " << v
-                         << " (peso " << w << ")" << endl;
+                    cerr << "Aviso: Não foi possível adicionar aresta " << u << " - " << v
+                         << " (rótulo " << label << ")" << endl;
                 }
             }
             else
             {
-                // Linha contém dois números: aresta sem peso explícito
-                if (!add_edge(u, v))
+                // Linha contém dois números: aresta sem rótulo explícito (rótulo padrão = 0)
+                if (!add_edge(u, v, 0))
                 {
-                    cerr << "Aviso: Não foi possível adicionar aresta " << u << " -> " << v << endl;
+                    cerr << "Aviso: Não foi possível adicionar aresta " << u << " - " << v << endl;
                 }
             }
         }
