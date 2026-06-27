@@ -273,7 +273,7 @@ int Graph::get_edge_label(int u, int v) const
 // Leitura de arquivo
 bool Graph::readFromFile(const string &filename)
 {
-    string filepath = "../graphFiles/" + filename;
+    string filepath = "../data/" + filename;
     ifstream file(filepath);
 
     if (!file.is_open())

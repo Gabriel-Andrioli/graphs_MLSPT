@@ -29,11 +29,11 @@ void initial_menu(Graph &graph)
         else if (option == '1')
         {
             string filename;
-            cout << "Digite o nome do arquivo (na pasta graphFiles/): ";
+            cout << "Digite o caminho do arquivo a partir da pasta data/ (ex: scenario_.../instance_x.txt): ";
             cin.ignore();
             getline(cin, filename);
 
-            cout << "Carregando grafo do arquivo graphFiles/" << filename << "...\n";
+            cout << "Carregando grafo do arquivo data/" << filename << "...\n";
             if (graph.readFromFile(filename))
             {
                 cout << "Grafo carregado com sucesso!\n";
@@ -74,7 +74,7 @@ void main_menu(Graph &graph)
         cout << "V - Obter quantidade de vertices\n";
         cout << "F - Obter frequencias globais de rotulos\n";
         cout << "M - Verificar se um vertice e mono-rotulo (mono-label)\n";
-        cout << "P - Testar Fase 1 (Pre-processamento) do Solver\n";
+        cout << "P - Executar Algoritmo Guloso (Fases 1 a 4)\n";
         cout << "X - Sair\n";
         cout << "Escolha: ";
         cin >> option;
@@ -277,9 +277,9 @@ void main_menu(Graph &graph)
         }
         else if (option == 'P' || option == 'p')
         {
-            cout << "\n=== EXECUCAO DO SOLVER (FASE 1 E FASE 2) ===\n";
+            cout << "\n=== EXECUCAO DO SOLVER - ALGORITMO GULOSO (FASES 1 A 4) ===\n";
             MLSPTSolver solver(graph);
-            solver.solve(); // Executa Pré-processamento e Inicialização
+            solver.solve(); // Executa pré-processamento, inicialização, expansão e finalização
             
             cout << "\n--- FASE 1: ELEMENTOS INCONTORNAVEIS ---\n";
             cout << "Arestas Incontornaveis encontradas:\n";

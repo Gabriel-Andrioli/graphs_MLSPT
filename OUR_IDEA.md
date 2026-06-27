@@ -18,8 +18,9 @@ O algoritmo constrói uma árvore geradora de forma iterativa (semelhante/inspir
 A Fila de Prioridade ordena os rótulos do mais atrativo (início da fila) para o menos atrativo (fim da fila), seguindo rigorosamente esta ordem de critérios:
 
 1. **Critério Primário (Reuso):** Rótulos que já pertencem ao conjunto `Usados` têm prioridade máxima.
-2. **Critério Secundário (Frequência):** Caso os rótulos comparados tenham o mesmo status no Critério 1, a prioridade é dada àquele com maior valor no `Mapa de Recorrência`.
-3. **Critério Terciário (Desempate):** Ordem alfabética ou arbitrária consistente (provavelmente ordem de inserção ou o que facilite a implementação).
+2. **Critério Secundário (Incontornabilidade):** Rótulos que pertencem a `unavoidable_labels` (rótulos incontornáveis identificados no pré-processamento que ainda não foram usados) têm a segunda maior prioridade.
+3. **Critério Terciário (Frequência):** Caso os rótulos comparados tenham o mesmo status nos critérios 1 e 2, a prioridade é dada àquele com maior valor no `Mapa de Recorrência`.
+4. **Critério Quaternário (Desempate):** Ordem arbitrária consistente (ex: menor ID numérico do rótulo).
 
 ## 4. Passo a Passo do Algoritmo
 
