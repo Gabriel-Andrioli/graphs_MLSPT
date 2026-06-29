@@ -6,6 +6,47 @@
 
 using namespace std;
 
+void heapify(vector<pair<int, int>>& arr, int n, int i)
+{
+    int extremum = i; 
+    int left = 2 * i + 1; // filho esquerdo
+    int right = 2 * i + 2; // filho direito
+
+    // Usando uma funcao auxiliar (lambda) para comparar qual deve subir para a raiz.
+    auto is_less = [](const pair<int, int>& a, const pair<int, int>& b) {
+        if (a.second != b.second)
+            return a.second < b.second;
+        return a.first < b.first; 
+    };
+
+    if (left < n && is_less(arr[left], arr[extremum]))
+        extremum = left;
+
+    if (right < n && is_less(arr[right], arr[extremum]))
+        extremum = right;
+
+    if (extremum != i)
+    {
+        swap(arr[i], arr[extremum]);
+        heapify(arr, n, extremum);
+    }
+}
+
+void heapSort(vector<pair<int, int>>& arr)
+{
+    int n = arr.size();
+
+    for (int i = n / 2 - 1; i >= 0; i--)
+        heapify(arr, n, i);
+
+    for (int i = n - 1; i > 0; i--)
+    {
+        swap(arr[0], arr[i]);
+        heapify(arr, i, 0);
+    }
+}
+// --------------------------------------------------------
+
 void initial_menu(Graph &graph)
 {
     char option;
@@ -246,7 +287,7 @@ void main_menu(Graph &graph)
         }
         else if (option == 'F' || option == 'f')
         {
-            cout << "Frequencias globais de rotulos:\n";
+            cout << "Frequencias globais de rotulos (Ordenados):\n";
             const auto& freqs = graph.get_label_frequencies();
             if (freqs.empty())
             {
@@ -254,7 +295,13 @@ void main_menu(Graph &graph)
             }
             else
             {
-                for (const auto& pair : freqs)
+                // Copia do unordered_map para um vector de pairs
+                vector<pair<int, int>> sorted_freqs(freqs.begin(), freqs.end());
+                
+                // Ordena o vector usando o Heap Sort
+                heapSort(sorted_freqs);
+
+                for (const auto& pair : sorted_freqs)
                 {
                     cout << "  Rotulo " << pair.first << ": " << pair.second << " ocorrencia(s)\n";
                 }
