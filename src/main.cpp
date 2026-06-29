@@ -29,11 +29,11 @@ void initial_menu(Graph &graph)
         else if (option == '1')
         {
             string filename;
-            cout << "Digite o caminho do arquivo a partir da pasta data/ (ex: scenario_.../instance_x.txt): ";
+            cout << "Digite o nome do arquivo dentro da pasta data (ex: scenario_.../instance_x.txt): ";
             cin.ignore();
             getline(cin, filename);
 
-            cout << "Carregando grafo do arquivo data/" << filename << "...\n";
+            cout << "Carregando grafo do arquivo " << filename << "...\n";
             if (graph.readFromFile(filename))
             {
                 cout << "Grafo carregado com sucesso!\n";

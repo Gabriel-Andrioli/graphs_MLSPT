@@ -273,12 +273,28 @@ int Graph::get_edge_label(int u, int v) const
 // Leitura de arquivo
 bool Graph::readFromFile(const string &filename)
 {
-    string filepath = "../data/" + filename;
-    ifstream file(filepath);
+    // Tenta diferentes caminhos comuns dependendo de onde o executável foi chamado
+    string possible_paths[] = {
+        filename,                  // Se o usuário passar o caminho completo ou executar da pasta data/
+        "data/" + filename,        // Se executar da raiz do projeto (graphs_MLSPT/)
+        "../data/" + filename,     // Se executar da pasta build/ (comum no Linux)
+        "../../data/" + filename   // Se executar da pasta build/Debug/ (comum no Windows/Visual Studio)
+    };
+
+    ifstream file;
+    string filepath_used = "";
+
+    for (const string& p : possible_paths) {
+        file.open(p);
+        if (file.is_open()) {
+            filepath_used = p;
+            break;
+        }
+    }
 
     if (!file.is_open())
     {
-        cerr << "Erro ao abrir arquivo: " << filepath << endl;
+        cerr << "Erro ao abrir arquivo em nenhum dos caminhos previstos para: " << filename << endl;
         return false;
     }
 
