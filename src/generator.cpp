@@ -11,15 +11,28 @@
 namespace fs = std::filesystem;
 using namespace std;
 
-// =========================================================================
-// CONSTANTES DE CONFIGURAÇÃO DO GERADOR
-// =========================================================================
-const vector<int> VALUES_N = {50, 100};
-const vector<double> MULTIPLIERS_L = {0.25, 0.5, 1.0, 1.25};
-const vector<double> DENSITIES_D = {0.2, 0.5, 0.8};
-const int NUM_INSTANCES_PER_SCENARIO = 10;
+struct ParameterSet {
+    vector<int> values_n;
+    vector<double> multipliers_l;
+    vector<double> densities_d;
+};
+
+const vector<ParameterSet> PARAMETER_SETS = {
+    // Grupo 1 de Cerulli: n=20,30,40,50; l=n (multiplicador 1.0); d=0.2,0.5,0.8
+    { {20, 30, 40, 50}, {1.0}, {0.2, 0.5, 0.8} },
+    
+    // Grupo 2 de Cerulli (n=50): omitido multiplicador 1.0 (l=50) para evitar duplicados
+    { {50}, {0.25, 0.5, 1.25}, {0.2, 0.5, 0.8} },
+    
+    // Grupo 2 de Cerulli (n=100): todos os multiplicadores {0.25, 0.5, 1.0, 1.25}
+    { {100}, {0.25, 0.5, 1.0, 1.25}, {0.2, 0.5, 0.8} },
+    
+    // Grupo de Consoli: n=500,1000; l={0.25, 0.5, 0.75, 1.0, 1.25}; d=0.2,0.5,0.8
+    { {500, 1000}, {0.25, 0.5, 0.75, 1.0, 1.25}, {0.2, 0.5, 0.8} }
+};
+
+const int NUM_INSTANCES_PER_SCENARIO = 1;
 const string OUTPUT_ROOT_DIR = "data";
-// =========================================================================
 
 struct GeneratedEdge {
     int u;
@@ -32,9 +45,7 @@ void generate_instance(int n, int l, int m, const string &filepath)
 {
     vector<GeneratedEdge> edges;
     
-    // ---------------------------------------------------------------------
-    // Passo 1: Construir árvore geradora (Spanning Tree) para garantir conectividade
-    // ---------------------------------------------------------------------
+    // Passo 1: Construir árvore geradora para garantir conectividade
     vector<int> connected;
     vector<int> unconnected;
     
@@ -72,9 +83,7 @@ void generate_instance(int n, int l, int m, const string &filepath)
         unconnected.erase(unconnected.begin() + unconn_idx);
     }
     
-    // ---------------------------------------------------------------------
     // Passo 2: Adicionar as m - (n-1) arestas restantes aleatoriamente
-    // ---------------------------------------------------------------------
     int remaining_edges = m - (n - 1);
     
     // Lista de todas as possíveis arestas que ainda não existem
@@ -108,9 +117,7 @@ void generate_instance(int n, int l, int m, const string &filepath)
         edges.push_back(e);
     }
     
-    // ---------------------------------------------------------------------
     // Passo 3: Atribuição de Rótulos (Garantindo que todos os l rótulos aparecem)
-    // ---------------------------------------------------------------------
     // Rótulos serão de 1 a l
     vector<int> label_pool;
     
@@ -139,9 +146,7 @@ void generate_instance(int n, int l, int m, const string &filepath)
         edges[i].label = label_pool[i];
     }
     
-    // ---------------------------------------------------------------------
     // Passo 4: Salvar a Instância no Arquivo
-    // ---------------------------------------------------------------------
     ofstream file(filepath);
     if (!file.is_open())
     {
@@ -171,36 +176,35 @@ int main(int argc, char *argv[])
     
     cout << "Iniciando a geracao de instancias do MLSTP...\n";
     
+    // Garante que o diretório root existe
+    try {
+        fs::create_directories(OUTPUT_ROOT_DIR);
+    } catch (const exception &e) {
+        cerr << "Nao foi possivel criar o diretorio " << OUTPUT_ROOT_DIR << ": " << e.what() << endl;
+        return 1;
+    }
+    
     int total_files = 0;
     
-    // Loop por todos os cenários
-    for (int n : VALUES_N)
+    // Loop por todos os conjuntos de parâmetros
+    for (const auto &set : PARAMETER_SETS)
     {
-        for (double l_mult : MULTIPLIERS_L)
+        for (int n : set.values_n)
         {
-            int l = static_cast<int>(l_mult * n);
-            for (double d : DENSITIES_D)
+            for (double l_mult : set.multipliers_l)
             {
-                // Calcula m = (d * (n - 1) * n) / 2
-                int m = static_cast<int>((d * (n - 1) * n) / 2.0);
-                
-                // Cria nome do diretório do cenário
-                stringstream ss;
-                ss << OUTPUT_ROOT_DIR << "/scenario_n" << n << "_l" << l << "_d" << fixed << setprecision(2) << d;
-                string folder_name = ss.str();
-                
-                // Garante que a pasta existe
-                try {
-                    fs::create_directories(folder_name);
-                } catch (const exception &e) {
-                    cerr << "Nao foi possivel criar o diretorio " << folder_name << ": " << e.what() << endl;
-                    return 1;
-                }
-                
-                // Gera 10 instâncias
-                for (int inst = 1; inst <= NUM_INSTANCES_PER_SCENARIO; ++inst)
+                int l = static_cast<int>(l_mult * n);
+                for (double d : set.densities_d)
                 {
-                    string filepath = folder_name + "/instance_" + to_string(inst) + ".txt";
+                    // Calcula m = (d * (n - 1) * n) / 2
+                    int m = static_cast<int>((d * (n - 1) * n) / 2.0);
+                    
+                    // Cria o nome do arquivo diretamente na pasta OUTPUT_ROOT_DIR
+                    // Nome do arquivo: scenario_n<n>_l<l>_d<d>_instance01.txt
+                    stringstream ss;
+                    ss << OUTPUT_ROOT_DIR << "/scenario_n" << n << "_l" << l << "_d" << fixed << setprecision(2) << d << "_instance01.txt";
+                    string filepath = ss.str();
+                    
                     generate_instance(n, l, m, filepath);
                     total_files++;
                 }

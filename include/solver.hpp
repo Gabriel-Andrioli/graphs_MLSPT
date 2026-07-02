@@ -7,50 +7,47 @@
 #include <unordered_map>
 #include <utility>
 
+using namespace std;
+
 class MLSPTSolver
 {
 private:
     const Graph &graph;
-
-    // Fase 1: Estado do pré-processamento
-    std::unordered_map<int, int> recurrence_map;          // Mapa de recorrência global (Rótulo -> Frequência)
-    std::vector<std::pair<int, int>> unavoidable_edges;   // Arestas incontornáveis (u, v) onde u < v
-    std::unordered_set<int> unavoidable_labels;           // Rótulos incontornáveis identificados
-
-    // Fase 2: Estado da solução ativa
-    std::vector<std::pair<int, int>> selected_edges;      // Solução S
-    std::unordered_set<int> visited_vertices;             // Visitados
-    std::unordered_set<int> used_labels;                  // Usados
-    std::vector<int> label_priority_queue;                // Fila de Prioridades
-
-    // Estrutura de hash para std::pair para podermos usar em std::unordered_set
+    unordered_map<int, int> recurrence_map;          // Mapa de recorrência global (Rótulo -> Frequência)
+    vector<pair<int, int>> selected_edges;           // Solução S
+    unordered_set<int> visited_vertices;             // Visitados
+    unordered_set<int> used_labels;                  // Usados
+    vector<int> label_priority_queue;                // Fila de Prioridades
     struct PairHash {
-        std::size_t operator()(const std::pair<int, int> &p) const {
-            return std::hash<int>()(p.first) ^ std::hash<int>()(p.second);
+        size_t operator()(const pair<int, int> &p) const {
+            return hash<int>()(p.first) ^ hash<int>()(p.second);
         }
     };
-    std::unordered_set<std::pair<int, int>, PairHash> selected_edges_set; // Busca rápida para duplicados
+    unordered_set<pair<int, int>, PairHash> selected_edges_set; // Busca rápida para duplicados
 
     // Métodos privados das fases
     void preprocess();            // Fase 1
     void initialize_solution();   // Fase 2
     void update_priority_queue(); // Ordenação da fila de prioridade
     void expansion_loop();        // Fase 3 e 4
+    void visit_vertex(int v, unordered_map<int, vector<pair<int, int>>> &frontier_by_label);
+    void reset_state();
 
 public:
     MLSPTSolver(const Graph &graph);
     
     // Método principal de orquestração do solver
     void solve();
+    void solve_greedy();
+    void solve_randomized(double alpha, int iterations);
+    void solve_reactive(int iterations, int block_size, const vector<double> &alphas);
     
     // Getters para fins de teste
-    const std::vector<std::pair<int, int>>& get_unavoidable_edges() const;
-    const std::unordered_set<int>& get_unavoidable_labels() const;
-    const std::unordered_map<int, int>& get_recurrence_map() const;
-    const std::vector<std::pair<int, int>>& get_selected_edges() const;
-    const std::unordered_set<int>& get_visited_vertices() const;
-    const std::unordered_set<int>& get_used_labels() const;
-    const std::vector<int>& get_label_priority_queue() const;
+    const unordered_map<int, int>& get_recurrence_map() const;
+    const vector<pair<int, int>>& get_selected_edges() const;
+    const unordered_set<int>& get_visited_vertices() const;
+    const unordered_set<int>& get_used_labels() const;
+    const vector<int>& get_label_priority_queue() const;
 };
 
 #endif // SOLVER_HPP

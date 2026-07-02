@@ -32,7 +32,6 @@ public:
     vector<Edge> neighbors; // lista de adjacências
     unordered_map<int, int> label_counts; // Rótulo -> Frequência de incidência local
     Node(int id);
-    bool is_mono_label() const; // Retorna true se possui exatamente 1 tipo de rótulo incidente
 };
 
 class Graph
@@ -47,6 +46,7 @@ private:
 public:
     Graph();
     ~Graph();
+    void clear();
 
     int add_vertex(int id);                           // 1. Inserir vértice
     bool remove_vertex(int id);                       // 2. Remover vértice
@@ -61,10 +61,8 @@ public:
     bool are_adjacent(int u, int v) const;            // 9. Verificar se dois vértices são adjacentes
     int get_edge_label(int u, int v) const;           // Retorna o rótulo da aresta entre u e v
 
-    // Novas Consultas Heurísticas
     int get_label_frequency(int label) const;
     const unordered_map<int, int>& get_label_frequencies() const;
-    bool is_vertex_mono_label(int id) const;
 
     // Leitura de arquivo
     bool readFromFile(const string &filename);
