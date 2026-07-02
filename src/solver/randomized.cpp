@@ -23,9 +23,7 @@ void MLSPTSolver::solve_randomized(double alpha, int iterations)
         reset_state();
         preprocess();
 
-        // ==========================================
         // 1. Inicialização Randomizada
-        // ==========================================
         // Coleta todos os rótulos que têm pelo menos uma aresta no grafo
         vector<int> sorted_initial_labels;
         for (const auto& pair : recurrence_map)
@@ -88,9 +86,7 @@ void MLSPTSolver::solve_randomized(double alpha, int iterations)
 
         update_priority_queue();
 
-        // ==========================================
         // 2. Loop de Expansão Randomizada
-        // ==========================================
         selected_edges_set.clear();
         selected_edges_set.insert({min(initial_edge.first, initial_edge.second), max(initial_edge.first, initial_edge.second)});
 
@@ -200,9 +196,7 @@ void MLSPTSolver::solve_randomized(double alpha, int iterations)
             }
         }
 
-        // ==========================================
         // 3. Avalia o resultado desta iteração
-        // ==========================================
         if (!disconnected && visited_vertices.size() == (size_t)num_vertices)
         {
             if (used_labels.size() < best_cost)
@@ -217,9 +211,7 @@ void MLSPTSolver::solve_randomized(double alpha, int iterations)
         }
     }
 
-    // ==========================================
     // 4. Salva a melhor solução no estado do solver
-    // ==========================================
     reset_state();
     preprocess();
 
