@@ -47,6 +47,7 @@ private:
 public:
     Graph();
     ~Graph();
+    void clear();
 
     int add_vertex(int id);                           // 1. Inserir vértice
     bool remove_vertex(int id);                       // 2. Remover vértice

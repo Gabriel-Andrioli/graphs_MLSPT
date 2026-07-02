@@ -1,5 +1,6 @@
 #include <iostream>
 #include <limits>
+#include <algorithm>
 #include "graph.hpp"
 #include "random_manager.hpp"
 #include "solver.hpp"
@@ -103,19 +104,13 @@ void main_menu(Graph &graph)
     {
         cout << "\n=== MENU PRINCIPAL ===\n";
         cout << "0 - Mostrar grafo\n";
-        cout << "1 - Adicionar vertice\n";
-        cout << "2 - Remover vertice\n";
-        cout << "3 - Adicionar aresta\n";
-        cout << "4 - Remover aresta\n";
-        cout << "5 - Verificar existencia de aresta\n";
-        cout << "6 - Consultar rotulo de aresta\n";
-        cout << "7 - Calcular grau de um vertice\n";
-        cout << "8 - Listar vizinhos de um vertice\n";
-        cout << "9 - Verificar se dois vertices sao adjacentes\n";
-        cout << "V - Obter quantidade de vertices\n";
-        cout << "F - Obter frequencias globais de rotulos\n";
-        cout << "M - Verificar se um vertice e mono-rotulo (mono-label)\n";
-        cout << "P - Executar Algoritmo Guloso (Fases 1 a 4)\n";
+        cout << "1 - Carregar novo grafo (outro arquivo)\n";
+        cout << "2 - Editar grafo\n";
+        cout << "3 - Consultar rotulo de aresta\n";
+        cout << "4 - Obter quantidade de vertices\n";
+        cout << "5 - Obter frequencias globais de rotulos\n";
+        cout << "6 - Verificar se um vertice e mono-rotulo (mono-label)\n";
+        cout << "7 - Executar Algoritmo Guloso (Fases 1 a 4)\n";
         cout << "X - Sair\n";
         cout << "Escolha: ";
         cin >> option;
@@ -128,88 +123,115 @@ void main_menu(Graph &graph)
         }
         else if (option == '1')
         {
-            int id;
-            cout << "ID do novo vertice: ";
-            cin >> id;
+            string filename;
+            cout << "Digite o nome do arquivo dentro da pasta data (ex: scenario_.../instance_x.txt): ";
+            cin.ignore();
+            getline(cin, filename);
 
-            if (graph.add_vertex(id) == -1)
+            cout << "Limpando o grafo atual...\n";
+            graph.clear();
+
+            cout << "Carregando grafo do arquivo " << filename << "...\n";
+            if (graph.readFromFile(filename))
             {
-                cout << "Falha ao adicionar vertice (id ja existe).\n";
-            }
-            else
-            {
-                cout << "Vertice " << id << " adicionado com sucesso!\n";
+                cout << "Grafo carregado com sucesso!\n";
+                cout << "Visao do grafo atualizado com os dados do arquivo:\n";
+                graph.print();
             }
         }
         else if (option == '2')
         {
-            int id;
-            cout << "ID do vertice a remover: ";
-            cin >> id;
+            char edit_option;
+            do
+            {
+                cout << "\n=== EDITAR GRAFO ===\n";
+                cout << "1 - Adicionar vertice\n";
+                cout << "2 - Remover vertice\n";
+                cout << "3 - Adicionar aresta\n";
+                cout << "4 - Remover aresta\n";
+                cout << "B - Voltar ao menu principal\n";
+                cout << "Escolha: ";
+                cin >> edit_option;
 
-            if (graph.remove_vertex(id))
-            {
-                cout << "Vertice " << id << " removido com sucesso!\n";
-            }
-            else
-            {
-                cout << "Falha ao remover vertice (vertice nao encontrado).\n";
-            }
+                edit_option = toupper(edit_option);
+
+                if (edit_option == '1')
+                {
+                    int id;
+                    cout << "ID do novo vertice: ";
+                    cin >> id;
+
+                    if (graph.add_vertex(id) == -1)
+                    {
+                        cout << "Falha ao adicionar vertice (id ja existe).\n";
+                    }
+                    else
+                    {
+                        cout << "Vertice " << id << " adicionado com sucesso!\n";
+                    }
+                }
+                else if (edit_option == '2')
+                {
+                    int id;
+                    cout << "ID do vertice a remover: ";
+                    cin >> id;
+
+                    if (graph.remove_vertex(id))
+                    {
+                        cout << "Vertice " << id << " removido com sucesso!\n";
+                    }
+                    else
+                    {
+                        cout << "Falha ao remover vertice (vertice nao encontrado).\n";
+                    }
+                }
+                else if (edit_option == '3')
+                {
+                    int u, v, label = 0;
+                    cout << "ID do vertice u: ";
+                    cin >> u;
+                    cout << "ID do vertice v: ";
+                    cin >> v;
+                    cout << "Rotulo da aresta (padrao=0): ";
+                    cin >> label;
+
+                    if (graph.add_edge(u, v, label))
+                    {
+                        cout << "Aresta adicionada com sucesso!\n";
+                    }
+                    else
+                    {
+                        cout << "Falha ao adicionar aresta (vertices inexistentes ou aresta ja existe).\n";
+                    }
+                }
+                else if (edit_option == '4')
+                {
+                    int u, v;
+                    cout << "ID do vertice u: ";
+                    cin >> u;
+                    cout << "ID do vertice v: ";
+                    cin >> v;
+
+                    if (graph.remove_edge(u, v))
+                    {
+                        cout << "Aresta removida com sucesso!\n";
+                    }
+                    else
+                    {
+                        cout << "Falha ao remover aresta (aresta nao existe).\n";
+                    }
+                }
+                else if (edit_option == 'B')
+                {
+                    break;
+                }
+                else
+                {
+                    cout << "Opcao invalida! Tente novamente.\n";
+                }
+            } while (true);
         }
         else if (option == '3')
-        {
-            int u, v, label = 0;
-            cout << "ID do vertice u: ";
-            cin >> u;
-            cout << "ID do vertice v: ";
-            cin >> v;
-            cout << "Rotulo da aresta (padrao=0): ";
-            cin >> label;
-
-            if (graph.add_edge(u, v, label))
-            {
-                cout << "Aresta adicionada com sucesso!\n";
-            }
-            else
-            {
-                cout << "Falha ao adicionar aresta (vertices inexistentes ou aresta ja existe).\n";
-            }
-        }
-        else if (option == '4')
-        {
-            int u, v;
-            cout << "ID do vertice u: ";
-            cin >> u;
-            cout << "ID do vertice v: ";
-            cin >> v;
-
-            if (graph.remove_edge(u, v))
-            {
-                cout << "Aresta removida com sucesso!\n";
-            }
-            else
-            {
-                cout << "Falha ao remover aresta (aresta nao existe).\n";
-            }
-        }
-        else if (option == '5')
-        {
-            int u, v;
-            cout << "ID do vertice u: ";
-            cin >> u;
-            cout << "ID do vertice v: ";
-            cin >> v;
-
-            if (graph.has_edge(u, v))
-            {
-                cout << "Existe aresta entre " << u << " e " << v << ".\n";
-            }
-            else
-            {
-                cout << "Nao existe aresta entre " << u << " e " << v << ".\n";
-            }
-        }
-        else if (option == '6')
         {
             int u, v;
             cout << "ID do vertice u: ";
@@ -227,65 +249,11 @@ void main_menu(Graph &graph)
                 cout << "O rotulo da aresta entre " << u << " e " << v << " e: " << label << endl;
             }
         }
-        else if (option == '7')
-        {
-            int id;
-            cout << "ID do vertice: ";
-            cin >> id;
-
-            int deg = graph.degree(id);
-            if (deg == -1)
-            {
-                cout << "Vertice nao encontrado.\n";
-            }
-            else
-            {
-                cout << "Grau do vertice " << id << ": " << deg << endl;
-            }
-        }
-        else if (option == '8')
-        {
-            int id;
-            cout << "ID do vertice: ";
-            cin >> id;
-
-            vector<int> neighbors = graph.get_neighbors(id);
-            if (neighbors.empty())
-            {
-                cout << "O vertice " << id << " nao possui vizinhos.\n";
-            }
-            else
-            {
-                cout << "Vizinhos do vertice " << id << ": ";
-                for (int n : neighbors)
-                {
-                    cout << n << " ";
-                }
-                cout << endl;
-            }
-        }
-        else if (option == '9')
-        {
-            int u, v;
-            cout << "ID do vertice u: ";
-            cin >> u;
-            cout << "ID do vertice v: ";
-            cin >> v;
-
-            if (graph.are_adjacent(u, v))
-            {
-                cout << u << " e " << v << " sao adjacentes.\n";
-            }
-            else
-            {
-                cout << u << " e " << v << " nao sao adjacentes.\n";
-            }
-        }
-        else if (option == 'V' || option == 'v')
+        else if (option == '4')
         {
             cout << "Quantidade total de vertices: " << graph.get_vertices_count() << endl;
         }
-        else if (option == 'F' || option == 'f')
+        else if (option == '5')
         {
             cout << "Frequencias globais de rotulos (Ordenados):\n";
             const auto& freqs = graph.get_label_frequencies();
@@ -295,10 +263,7 @@ void main_menu(Graph &graph)
             }
             else
             {
-                // Copia do unordered_map para um vector de pairs
                 vector<pair<int, int>> sorted_freqs(freqs.begin(), freqs.end());
-                
-                // Ordena o vector usando o Heap Sort
                 heapSort(sorted_freqs);
 
                 for (const auto& pair : sorted_freqs)
@@ -307,7 +272,7 @@ void main_menu(Graph &graph)
                 }
             }
         }
-        else if (option == 'M' || option == 'm')
+        else if (option == '6')
         {
             int id;
             cout << "ID do vertice: ";
@@ -322,82 +287,61 @@ void main_menu(Graph &graph)
                 cout << "O vertice " << id << " NAO e mono-rotulo.\n";
             }
         }
-        else if (option == 'P' || option == 'p')
+        else if (option == '7')
         {
-            cout << "\n=== EXECUCAO DO SOLVER - ALGORITMO GULOSO (FASES 1 A 4) ===\n";
             MLSPTSolver solver(graph);
-            solver.solve(); // Executa pré-processamento, inicialização, expansão e finalização
+            solver.solve();
+
+            bool success = (solver.get_visited_vertices().size() == graph.get_vertices_count());
+
+            cout << "\n=== RESULTADO DO ALGORITMO GULOSO ===\n";
+            cout << "Status: " << (success ? "SUCESSO" : "FALHA") << "\n";
+            cout << "Quantidade de rotulos usados: " << solver.get_used_labels().size() << "\n";
             
-            cout << "\n--- FASE 1: ELEMENTOS INCONTORNAVEIS ---\n";
-            cout << "Arestas Incontornaveis encontradas:\n";
-            const auto& edges = solver.get_unavoidable_edges();
-            if (edges.empty())
+            cout << "Lista de rotulos usados: ";
+            for (int label : solver.get_used_labels())
             {
-                cout << "  (nenhuma aresta incontornavel)\n";
-            }
-            else
-            {
-                for (const auto& edge : edges)
-                {
-                    cout << "  Aresta: " << edge.first << " - " << edge.second 
-                         << " (rotulo: " << graph.get_edge_label(edge.first, edge.second) << ")\n";
-                }
-            }
-
-            cout << "Rotulos Incontornaveis encontrados:\n";
-            const auto& labels = solver.get_unavoidable_labels();
-            if (labels.empty())
-            {
-                cout << "  (nenhum rotulo incontornavel)\n";
-            }
-            else
-            {
-                for (int label : labels)
-                {
-                    cout << "  Rotulo: " << label << "\n";
-                }
-            }
-
-            cout << "\n--- FASES 2, 3 e 4: RESULTADO FINAL DA SOLUCAO ---\n";
-            cout << "Arestas na Arvore Geradora final (S):\n";
-            const auto& sel_edges = solver.get_selected_edges();
-            if (sel_edges.empty())
-            {
-                cout << "  (solucao vazia)\n";
-            }
-            else
-            {
-                for (const auto& edge : sel_edges)
-                {
-                    cout << "  Aresta: " << edge.first << " - " << edge.second 
-                         << " (rotulo: " << graph.get_edge_label(edge.first, edge.second) << ")\n";
-                }
-            }
-
-            cout << "Vertices em Visitados (" << solver.get_visited_vertices().size() << "):\n  ";
-            const auto& visited = solver.get_visited_vertices();
-            for (int v : visited)
-            {
-                cout << v << " ";
+                cout << label << " ";
             }
             cout << "\n";
 
-            cout << "Custo da Solucao (tamanho de Usados): " << solver.get_used_labels().size() << "\n";
-            cout << "Rotulos em Usados:\n  ";
-            const auto& used = solver.get_used_labels();
-            for (int l : used)
+            cout << "Fila final de prioridade: ";
+            for (int label : solver.get_label_priority_queue())
             {
-                cout << l << " ";
+                cout << label << " ";
             }
             cout << "\n";
 
-            cout << "Fila de Prioridades de Rotulos (Ordenada):\n  ";
-            const auto& pq = solver.get_label_priority_queue();
-            for (int l : pq)
+            if (success)
             {
-                cout << l << " ";
+                char show_graph;
+                cout << "Quer ver o grafo solucao final (arvore)? (S/N): ";
+                cin >> show_graph;
+                show_graph = toupper(show_graph);
+
+                if (show_graph == 'S')
+                {
+                    cout << "Solucao Final:\n";
+                    Graph solution_graph;
+                    vector<int> visited_sorted(solver.get_visited_vertices().begin(), solver.get_visited_vertices().end());
+                    sort(visited_sorted.begin(), visited_sorted.end());
+                    for (int v : visited_sorted)
+                    {
+                        solution_graph.add_vertex(v);
+                    }
+                    for (const auto& edge : solver.get_selected_edges())
+                    {
+                        solution_graph.add_edge(edge.first, edge.second, graph.get_edge_label(edge.first, edge.second));
+                    }
+                    solution_graph.print();
+                }
             }
-            cout << "\n============================================\n";
+            else
+            {
+                cout << "Solucao Final:\n";
+                cout << "(sem solucao - grafo desconexo)\n";
+            }
+            cout << "=====================================\n";
         }
         else if (option == 'X')
         {

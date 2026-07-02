@@ -38,6 +38,17 @@ Graph::~Graph()
     node_map.clear(); // limpa o mapa
 }
 
+void Graph::clear()
+{
+    for (Node *node : nodes)
+    {
+        delete node;
+    }
+    nodes.clear();
+    node_map.clear();
+    label_frequencies.clear();
+}
+
 // Limpa o flag de visitado de todos os nós
 void Graph::clear_visited()
 {
