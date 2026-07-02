@@ -1,6 +1,8 @@
 #include "solver.hpp"
 #include <algorithm>
 
+using namespace std;
+
 MLSPTSolver::MLSPTSolver(const Graph &g) : graph(g)
 {
 }
@@ -228,13 +230,14 @@ void MLSPTSolver::expansion_loop()
     selected_edges_set.clear();
     for (const auto& edge : selected_edges)
     {
-        selected_edges_set.insert({std::min(edge.first, edge.second), std::max(edge.first, edge.second)});
+        selected_edges_set.insert({min(edge.first, edge.second), max(edge.first, edge.second)});
     }
 
-    // Fronteira incremental de arestas candidatas
-    std::vector<std::pair<int, int>> frontier_edges;
+    // Fronteira de arestas agrupadas por rótulo (map)
+    // Para acesso rápido e busca eficiente
+    unordered_map<int, vector<pair<int, int>>> frontier_by_label;
 
-    // Função lambda para visitar um novo vértice e atualizar a fronteira de forma incremental
+    // Função lambda para visitar um novo vértice e atualizar a fronteira por rótulo
     auto visit_vertex = [&](int v) {
         visited_vertices.insert(v);
         // Adiciona arestas incidentes em v para vizinhos não visitados
@@ -242,20 +245,17 @@ void MLSPTSolver::expansion_loop()
         {
             if (visited_vertices.count(w) == 0)
             {
-                frontier_edges.push_back({std::min(v, w), std::max(v, w)});
+                int label = graph.get_edge_label(v, w);
+                if (label != -1)
+                {
+                    frontier_by_label[label].push_back({min(v, w), max(v, w)});
+                }
             }
         }
-        // Remove arestas da fronteira onde ambos os extremos já foram visitados
-        frontier_edges.erase(
-            std::remove_if(frontier_edges.begin(), frontier_edges.end(), [&](const std::pair<int, int>& edge) {
-                return visited_vertices.count(edge.first) > 0 && visited_vertices.count(edge.second) > 0;
-            }),
-            frontier_edges.end()
-        );
     };
 
     // Inicializa a fronteira a partir dos vértices já visitados na Fase 2
-    std::unordered_set<int> initial_visited = visited_vertices;
+    unordered_set<int> initial_visited = visited_vertices;
     visited_vertices.clear();
     for (int v : initial_visited)
     {
@@ -265,69 +265,61 @@ void MLSPTSolver::expansion_loop()
     // Loop de Expansão (Greedy Expansion)
     while ((int)visited_vertices.size() < num_vertices)
     {
-        if (frontier_edges.empty())
-        {
-            std::cerr << "[Erro] Grafo desconexo. Nao e possivel gerar arvore geradora.\n";
-            break;
-        }
-
-        // 1. Coleta os rótulos presentes na fronteira
-        std::unordered_set<int> candidate_labels;
-        for (const auto& edge : frontier_edges)
-        {
-            int label = graph.get_edge_label(edge.first, edge.second);
-            if (label != -1)
-            {
-                candidate_labels.insert(label);
-            }
-        }
-
-        // 2. Busca na fila de prioridade o primeiro rótulo que tem aresta na fronteira
+        // 1. Busca na fila de prioridade o primeiro rótulo que tem arestas válidas na fronteira
         int best_label = -1;
+        pair<int, int> best_edge;
+        bool found_edge = false;
+
         for (int label : label_priority_queue)
         {
-            if (candidate_labels.count(label) > 0)
+            auto it = frontier_by_label.find(label);
+            if (it != frontier_by_label.end() && !it->second.empty())
             {
-                best_label = label;
-                break;
+                // Limpa arestas inválidas desse rótulo (onde ambos os extremos já foram visitados)
+                auto &edges = it->second;
+                edges.erase(
+                    remove_if(edges.begin(), edges.end(), [&](const pair<int, int>& edge) {
+                        return visited_vertices.count(edge.first) > 0 && visited_vertices.count(edge.second) > 0;
+                    }),
+                    edges.end()
+                );
+
+                if (!edges.empty())
+                {
+                    best_label = label;
+                    // Encontra a melhor aresta para o best_label (desempate consistente)
+                    for (const auto& edge : edges)
+                    {
+                        if (!found_edge)
+                        {
+                            best_edge = edge;
+                            found_edge = true;
+                        }
+                        else
+                        {
+                            if (edge.first < best_edge.first)
+                            {
+                                best_edge = edge;
+                            }
+                            else if (edge.first == best_edge.first && edge.second < best_edge.second)
+                            {
+                                best_edge = edge;
+                            }
+                        }
+                    }
+                    break; // Encontramos o rótulo prioritário com aresta válida
+                }
             }
         }
 
-        if (best_label == -1)
+        if (!found_edge)
         {
-            std::cerr << "[Erro] Nenhum rotulo correspondente encontrado na fronteira.\n";
+            // Se nenhuma aresta foi encontrada mas ainda não visitamos todos, o grafo é desconexo
+            cerr << "[Erro] Grafo desconexo. Nao e possivel gerar arvore geradora.\n";
             break;
         }
 
-        // 3. Seleciona a melhor aresta candidata com o best_label
-        // Desempate consistente: menor ID de u, depois de v (com u < v na representação ordenada da aresta)
-        std::pair<int, int> best_edge;
-        bool found = false;
-
-        for (const auto& edge : frontier_edges)
-        {
-            if (graph.get_edge_label(edge.first, edge.second) == best_label)
-            {
-                if (!found)
-                {
-                    best_edge = edge;
-                    found = true;
-                }
-                else
-                {
-                    if (edge.first < best_edge.first)
-                    {
-                        best_edge = edge;
-                    }
-                    else if (edge.first == best_edge.first && edge.second < best_edge.second)
-                    {
-                        best_edge = edge;
-                    }
-                }
-            }
-        }
-
-        // 4. Atualização de Estado
+        // 2. Atualização de Estado
         if (selected_edges_set.count(best_edge) == 0)
         {
             selected_edges.push_back(best_edge);

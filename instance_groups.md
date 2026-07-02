@@ -48,16 +48,16 @@ Instâncias de médio porte com variações na proporção do número de rótulo
 
 ---
 
-## NECESSÁRIO DISCUTIR
 ## 3. Grupo de Consoli (2015)
 Instâncias de grande porte com maior granularidade de rótulos.
 
-- **Vértices ($n$):** 500
+- **Vértices ($n$):** 500, 1000
 - **Rótulos ($l$):** $l \in \{0.25n, 0.5n, 0.75n, n, 1.25n\}$
 - **Densidades ($d$):** 0.2, 0.5, 0.8
 - **Quantidade de instâncias por cenário:** 1
-- **Total de cenários:** 15
+- **Total de cenários:** 30
 
 | $n$ | Multiplicador de $l$ | $l$ | Densidades ($d$) | Arestas ($m$) |
 |---|---|---|---|---|
 | 500 | 0.25, 0.5, 0.75, 1.0, 1.25 | 125, 250, 375, 500, 625 | 0.2, 0.5, 0.8 | 24950, 62375, 99800 |
+| 1000 | 0.25, 0.5, 0.75, 1.0, 1.25 | 250, 500, 750, 1000, 1250 | 0.2, 0.5, 0.8 | 99900, 249750, 399600 |

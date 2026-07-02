@@ -26,6 +26,9 @@ const vector<ParameterSet> PARAMETER_SETS = {
     
     // Grupo 2 de Cerulli (n=100): todos os multiplicadores {0.25, 0.5, 1.0, 1.25}
     { {100}, {0.25, 0.5, 1.0, 1.25}, {0.2, 0.5, 0.8} },
+    
+    // Grupo de Consoli: n=500,1000; l={0.25, 0.5, 0.75, 1.0, 1.25}; d=0.2,0.5,0.8
+    { {500, 1000}, {0.25, 0.5, 0.75, 1.0, 1.25}, {0.2, 0.5, 0.8} }
 };
 
 const int NUM_INSTANCES_PER_SCENARIO = 1;
