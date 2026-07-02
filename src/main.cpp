@@ -109,8 +109,7 @@ void main_menu(Graph &graph)
         cout << "3 - Consultar rotulo de aresta\n";
         cout << "4 - Obter quantidade de vertices\n";
         cout << "5 - Obter frequencias globais de rotulos\n";
-        cout << "6 - Verificar se um vertice e mono-rotulo (mono-label)\n";
-        cout << "7 - Executar Algoritmo Guloso (Fases 1 a 4)\n";
+        cout << "6 - Executar Algoritmo Guloso (Fases 1 a 4)\n";
         cout << "X - Sair\n";
         cout << "Escolha: ";
         cin >> option;
@@ -273,21 +272,6 @@ void main_menu(Graph &graph)
             }
         }
         else if (option == '6')
-        {
-            int id;
-            cout << "ID do vertice: ";
-            cin >> id;
-
-            if (graph.is_vertex_mono_label(id))
-            {
-                cout << "O vertice " << id << " e mono-rotulo (mono-label)!\n";
-            }
-            else
-            {
-                cout << "O vertice " << id << " NAO e mono-rotulo.\n";
-            }
-        }
-        else if (option == '7')
         {
             MLSPTSolver solver(graph);
             solver.solve();

@@ -11,11 +11,6 @@ Node::Node(int id)
     this->visited = false;
 }
 
-bool Node::is_mono_label() const
-{
-    return label_counts.size() == 1;
-}
-
 Graph::Graph()
 {
 }
@@ -383,12 +378,4 @@ int Graph::get_label_frequency(int label) const
 const unordered_map<int, int>& Graph::get_label_frequencies() const
 {
     return label_frequencies;
-}
-
-bool Graph::is_vertex_mono_label(int id) const
-{
-    Node *n = find_node(id);
-    if (n)
-        return n->is_mono_label();
-    return false;
 }

@@ -3,8 +3,8 @@
 
 using namespace std;
 
-MLSPTSolver::MLSPTSolver(const Graph &g) : graph(g)
-{
+MLSPTSolver::MLSPTSolver(const Graph &g) {
+    this->graph = g;
 }
 
 void MLSPTSolver::solve()
@@ -17,52 +17,6 @@ void MLSPTSolver::solve()
 void MLSPTSolver::preprocess()
 {
     recurrence_map = graph.get_label_frequencies();
-    int num_vertices = graph.get_vertices_count();
-    
-    for (int u = 0; u < num_vertices; ++u)
-    {
-        // Verifica se o nó é mono-label
-        if (graph.is_vertex_mono_label(u))
-        {
-            vector<int> neighbors = graph.get_neighbors(u);
-            if (!neighbors.empty())
-            {
-                // Como é mono-label, qualquer uma das arestas incidentes tem o mesmo rótulo.
-                // Consultamos o rótulo da primeira aresta incidente.
-                int label = graph.get_edge_label(u, neighbors[0]);
-                if (label != -1)
-                {
-                    unavoidable_labels.insert(label);
-                }
-            }
-        }
-
-        // Verifica se o grau do nó é exatamente 1 (vértice folha)
-        if (graph.degree(u) == 1)
-        {
-            vector<int> neighbors = graph.get_neighbors(u);
-            if (!neighbors.empty())
-            {
-                int v = neighbors[0];
-                int edge_u = std::min(u, v);
-                int edge_v = std::max(u, v);
-                pair<int, int> edge = {edge_u, edge_v};
-                
-                // Evita inserir arestas duplicadas
-                if (std::find(unavoidable_edges.begin(), unavoidable_edges.end(), edge) == unavoidable_edges.end())
-                {
-                    unavoidable_edges.push_back(edge);
-                }
-
-                // A única aresta de um nó folha também tem rótulo incontornável
-                int label = graph.get_edge_label(u, v);
-                if (label != -1)
-                {
-                    unavoidable_labels.insert(label);
-                }
-            }
-        }
-    }
 }
 
 // Ordena a fila de prioridades de rótulos
@@ -74,24 +28,13 @@ void MLSPTSolver::update_priority_queue()
         label_priority_queue.push_back(pair.first);
     }
 
-    std::sort(label_priority_queue.begin(), label_priority_queue.end(), [this](int a, int b) {
+    sort(label_priority_queue.begin(), label_priority_queue.end(), [this](int a, int b) {
         bool a_used = used_labels.count(a) > 0;
         bool b_used = used_labels.count(b) > 0;
 
         if (a_used != b_used)
         {
             return a_used; // Usados primeiro
-        }
-
-        // Se ambos não foram usados, checamos se são incontornáveis
-        if (!a_used)
-        {
-            bool a_unavoidable = unavoidable_labels.count(a) > 0;
-            bool b_unavoidable = unavoidable_labels.count(b) > 0;
-            if (a_unavoidable != b_unavoidable)
-            {
-                return a_unavoidable; // Incontornáveis não usados primeiro
-            }
         }
 
         int freq_a = recurrence_map.at(a);
@@ -105,72 +48,44 @@ void MLSPTSolver::update_priority_queue()
     });
 }
 
-// Fase 2: Inicialização
 void MLSPTSolver::initialize_solution()
 {
     selected_edges.clear();
     visited_vertices.clear();
     used_labels.clear();
 
-    if (!unavoidable_edges.empty())
+    // Escolhe a primeira aresta do rótulo mais recorrente.
+    int max_label = -1;
+    int max_freq = -1;
+    for (const auto& pair : recurrence_map)
     {
-        // Fluxo A: Há arestas incontornáveis.
-        for (const auto& edge : unavoidable_edges)
+        if (pair.second > max_freq)
         {
-            selected_edges.push_back(edge);
-            
-            // Marca apenas o vértice de grau 1 (folha) como visitado
-            if (graph.degree(edge.first) == 1)
-            {
-                visited_vertices.insert(edge.first);
-            }
-            else
-            {
-                visited_vertices.insert(edge.second);
-            }
-
-            int label = graph.get_edge_label(edge.first, edge.second);
-            if (label != -1)
-            {
-                used_labels.insert(label);
-            }
+            max_freq = pair.second;
+            max_label = pair.first;
+        }
+        else if (pair.second == max_freq && (max_label == -1 || pair.first < max_label))
+        {
+            max_label = pair.first;
         }
     }
-    else
-    {
-        // Fluxo B: Sem arestas incontornáveis. Escolhe a primeira aresta do rótulo mais recorrente.
-        int max_label = -1;
-        int max_freq = -1;
-        for (const auto& pair : recurrence_map)
-        {
-            if (pair.second > max_freq)
-            {
-                max_freq = pair.second;
-                max_label = pair.first;
-            }
-            else if (pair.second == max_freq && (max_label == -1 || pair.first < max_label))
-            {
-                max_label = pair.first;
-            }
-        }
 
-        if (max_label != -1)
+    if (max_label != -1)
+    {
+        int num_vertices = graph.get_vertices_count();
+        bool found = false;
+        for (int u = 0; u < num_vertices && !found; ++u)
         {
-            int num_vertices = graph.get_vertices_count();
-            bool found = false;
-            for (int u = 0; u < num_vertices && !found; ++u)
+            for (int v : graph.get_neighbors(u))
             {
-                for (int v : graph.get_neighbors(u))
+                if (u < v && graph.get_edge_label(u, v) == max_label)
                 {
-                    if (u < v && graph.get_edge_label(u, v) == max_label)
-                    {
-                        selected_edges.push_back({u, v});
-                        visited_vertices.insert(u);
-                        visited_vertices.insert(v);
-                        used_labels.insert(max_label);
-                        found = true;
-                        break;
-                    }
+                    selected_edges.push_back({u, v});
+                    visited_vertices.insert(u);
+                    visited_vertices.insert(v);
+                    used_labels.insert(max_label);
+                    found = true;
+                    break;
                 }
             }
         }
@@ -180,37 +95,29 @@ void MLSPTSolver::initialize_solution()
     update_priority_queue();
 }
 
-const std::vector<std::pair<int, int>>& MLSPTSolver::get_unavoidable_edges() const
-{
-    return unavoidable_edges;
-}
 
-const std::unordered_set<int>& MLSPTSolver::get_unavoidable_labels() const
-{
-    return unavoidable_labels;
-}
 
-const std::unordered_map<int, int>& MLSPTSolver::get_recurrence_map() const
+const unordered_map<int, int>& MLSPTSolver::get_recurrence_map() const
 {
     return recurrence_map;
 }
 
-const std::vector<std::pair<int, int>>& MLSPTSolver::get_selected_edges() const
+const vector<pair<int, int>>& MLSPTSolver::get_selected_edges() const
 {
     return selected_edges;
 }
 
-const std::unordered_set<int>& MLSPTSolver::get_visited_vertices() const
+const unordered_set<int>& MLSPTSolver::get_visited_vertices() const
 {
     return visited_vertices;
 }
 
-const std::unordered_set<int>& MLSPTSolver::get_used_labels() const
+const unordered_set<int>& MLSPTSolver::get_used_labels() const
 {
     return used_labels;
 }
 
-const std::vector<int>& MLSPTSolver::get_label_priority_queue() const
+const vector<int>& MLSPTSolver::get_label_priority_queue() const
 {
     return label_priority_queue;
 }
@@ -262,7 +169,7 @@ void MLSPTSolver::expansion_loop()
         visit_vertex(v);
     }
 
-    // Loop de Expansão (Greedy Expansion)
+    // Loop de Expansão
     while ((int)visited_vertices.size() < num_vertices)
     {
         // 1. Busca na fila de prioridade o primeiro rótulo que tem arestas válidas na fronteira
