@@ -10,7 +10,14 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 include_directories(include)
 
-set(GRAPH_SOURCES src/graph.cpp src/random_manager.cpp src/solver.cpp)
+set(GRAPH_SOURCES 
+    src/graph.cpp 
+    src/random_manager.cpp 
+    src/solver/common.cpp 
+    src/solver/greedy.cpp 
+    src/solver/randomized.cpp 
+    src/solver/reactive.cpp
+)
 
 add_executable(MLSTP src/main.cpp ${GRAPH_SOURCES})
 add_executable(generator src/generator.cpp src/random_manager.cpp)

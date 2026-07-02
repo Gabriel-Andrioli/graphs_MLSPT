@@ -1,51 +1,20 @@
 #include "solver.hpp"
+#include <iostream>
 #include <algorithm>
 
 using namespace std;
 
-MLSPTSolver::MLSPTSolver(const Graph &g) {
-    this->graph = g;
-}
-
 void MLSPTSolver::solve()
 {
-    preprocess();          // Fase 1
-    initialize_solution(); // Fase 2
-    expansion_loop();      // Fase 3 e 4
+    solve_greedy();
 }
 
-void MLSPTSolver::preprocess()
+void MLSPTSolver::solve_greedy()
 {
-    recurrence_map = graph.get_label_frequencies();
-}
-
-// Ordena a fila de prioridades de rótulos
-void MLSPTSolver::update_priority_queue()
-{
-    label_priority_queue.clear();
-    for (const auto& pair : recurrence_map)
-    {
-        label_priority_queue.push_back(pair.first);
-    }
-
-    sort(label_priority_queue.begin(), label_priority_queue.end(), [this](int a, int b) {
-        bool a_used = used_labels.count(a) > 0;
-        bool b_used = used_labels.count(b) > 0;
-
-        if (a_used != b_used)
-        {
-            return a_used; // Usados primeiro
-        }
-
-        int freq_a = recurrence_map.at(a);
-        int freq_b = recurrence_map.at(b);
-        if (freq_a != freq_b)
-        {
-            return freq_a > freq_b; // Maior ocorrência global primeiro
-        }
-
-        return a < b; // Desempate consistente
-    });
+    reset_state();
+    preprocess();
+    initialize_solution();
+    expansion_loop();
 }
 
 void MLSPTSolver::initialize_solution()
@@ -95,40 +64,6 @@ void MLSPTSolver::initialize_solution()
     update_priority_queue();
 }
 
-
-
-const unordered_map<int, int>& MLSPTSolver::get_recurrence_map() const
-{
-    return recurrence_map;
-}
-
-const vector<pair<int, int>>& MLSPTSolver::get_selected_edges() const
-{
-    return selected_edges;
-}
-
-const unordered_set<int>& MLSPTSolver::get_visited_vertices() const
-{
-    return visited_vertices;
-}
-
-const unordered_set<int>& MLSPTSolver::get_used_labels() const
-{
-    return used_labels;
-}
-
-const vector<int>& MLSPTSolver::get_label_priority_queue() const
-{
-    return label_priority_queue;
-}
-
-struct CandidateEdge {
-    int u;
-    int v;
-    int label;
-    int priority_index;
-};
-
 void MLSPTSolver::expansion_loop()
 {
     int num_vertices = graph.get_vertices_count();
@@ -144,29 +79,12 @@ void MLSPTSolver::expansion_loop()
     // Para acesso rápido e busca eficiente
     unordered_map<int, vector<pair<int, int>>> frontier_by_label;
 
-    // Função lambda para visitar um novo vértice e atualizar a fronteira por rótulo
-    auto visit_vertex = [&](int v) {
-        visited_vertices.insert(v);
-        // Adiciona arestas incidentes em v para vizinhos não visitados
-        for (int w : graph.get_neighbors(v))
-        {
-            if (visited_vertices.count(w) == 0)
-            {
-                int label = graph.get_edge_label(v, w);
-                if (label != -1)
-                {
-                    frontier_by_label[label].push_back({min(v, w), max(v, w)});
-                }
-            }
-        }
-    };
-
     // Inicializa a fronteira a partir dos vértices já visitados na Fase 2
     unordered_set<int> initial_visited = visited_vertices;
     visited_vertices.clear();
     for (int v : initial_visited)
     {
-        visit_vertex(v);
+        visit_vertex(v, frontier_by_label);
     }
 
     // Loop de Expansão
@@ -182,14 +100,17 @@ void MLSPTSolver::expansion_loop()
             auto it = frontier_by_label.find(label);
             if (it != frontier_by_label.end() && !it->second.empty())
             {
-                // Limpa arestas inválidas desse rótulo (onde ambos os extremos já foram visitados)
+                // Limpa arestas inválidas desse rótulo in place (evita alocações)
                 auto &edges = it->second;
-                edges.erase(
-                    remove_if(edges.begin(), edges.end(), [&](const pair<int, int>& edge) {
-                        return visited_vertices.count(edge.first) > 0 && visited_vertices.count(edge.second) > 0;
-                    }),
-                    edges.end()
-                );
+                size_t write_idx = 0;
+                for (size_t read_idx = 0; read_idx < edges.size(); ++read_idx)
+                {
+                    if (visited_vertices.count(edges[read_idx].first) == 0 || visited_vertices.count(edges[read_idx].second) == 0)
+                    {
+                        edges[write_idx++] = edges[read_idx];
+                    }
+                }
+                edges.resize(write_idx);
 
                 if (!edges.empty())
                 {
@@ -246,7 +167,7 @@ void MLSPTSolver::expansion_loop()
 
         if (new_v != -1)
         {
-            visit_vertex(new_v);
+            visit_vertex(new_v, frontier_by_label);
         }
 
         // Atualização Dinâmica de Prioridade se o rótulo for inédito

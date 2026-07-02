@@ -30,12 +30,17 @@ private:
     void initialize_solution();   // Fase 2
     void update_priority_queue(); // Ordenação da fila de prioridade
     void expansion_loop();        // Fase 3 e 4
+    void visit_vertex(int v, unordered_map<int, vector<pair<int, int>>> &frontier_by_label);
+    void reset_state();
 
 public:
     MLSPTSolver(const Graph &graph);
     
     // Método principal de orquestração do solver
     void solve();
+    void solve_greedy();
+    void solve_randomized(double alpha, int iterations);
+    void solve_reactive(int iterations, int block_size, const vector<double> &alphas);
     
     // Getters para fins de teste
     const unordered_map<int, int>& get_recurrence_map() const;

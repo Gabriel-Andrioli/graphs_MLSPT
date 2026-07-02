@@ -110,6 +110,7 @@ void main_menu(Graph &graph)
         cout << "4 - Obter quantidade de vertices\n";
         cout << "5 - Obter frequencias globais de rotulos\n";
         cout << "6 - Executar Algoritmo Guloso (Fases 1 a 4)\n";
+        cout << "7 - Executar Algoritmo Guloso Randomizado\n";
         cout << "X - Sair\n";
         cout << "Escolha: ";
         cin >> option;
@@ -326,6 +327,76 @@ void main_menu(Graph &graph)
                 cout << "(sem solucao - grafo desconexo)\n";
             }
             cout << "=====================================\n";
+        }
+        else if (option == '7')
+        {
+            double alpha;
+            int iterations;
+            cout << "Digite o valor de alfa (entre 0.0 e 1.0): ";
+            cin >> alpha;
+            cout << "Digite o numero de iteracoes (maior que 0): ";
+            cin >> iterations;
+
+            if (alpha < 0.0 || alpha > 1.0 || iterations <= 0)
+            {
+                cout << "[Erro] Parametros invalidos.\n";
+            }
+            else
+            {
+                MLSPTSolver solver(graph);
+                solver.solve_randomized(alpha, iterations);
+
+                bool success = (solver.get_visited_vertices().size() == graph.get_vertices_count());
+
+                cout << "\n=== RESULTADO DO ALGORITMO GULOSO RANDOMIZADO ===\n";
+                cout << "Status: " << (success ? "SUCESSO" : "FALHA") << "\n";
+                cout << "Quantidade de rotulos usados: " << solver.get_used_labels().size() << "\n";
+                
+                cout << "Lista de rotulos usados: ";
+                for (int label : solver.get_used_labels())
+                {
+                    cout << label << " ";
+                }
+                cout << "\n";
+
+                cout << "Fila final de prioridade: ";
+                for (int label : solver.get_label_priority_queue())
+                {
+                    cout << label << " ";
+                }
+                cout << "\n";
+
+                if (success)
+                {
+                    char show_graph;
+                    cout << "Quer ver o grafo solucao final (arvore)? (S/N): ";
+                    cin >> show_graph;
+                    show_graph = toupper(show_graph);
+
+                    if (show_graph == 'S')
+                    {
+                        cout << "Solucao Final:\n";
+                        Graph solution_graph;
+                        vector<int> visited_sorted(solver.get_visited_vertices().begin(), solver.get_visited_vertices().end());
+                        sort(visited_sorted.begin(), visited_sorted.end());
+                        for (int v : visited_sorted)
+                        {
+                            solution_graph.add_vertex(v);
+                        }
+                        for (const auto& edge : solver.get_selected_edges())
+                        {
+                            solution_graph.add_edge(edge.first, edge.second, graph.get_edge_label(edge.first, edge.second));
+                        }
+                        solution_graph.print();
+                    }
+                }
+                else
+                {
+                    cout << "Solucao Final:\n";
+                    cout << "(sem solucao - grafo desconexo)\n";
+                }
+                cout << "=================================================\n";
+            }
         }
         else if (option == 'X')
         {
