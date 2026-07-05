@@ -79,8 +79,6 @@ void initial_menu(Graph &graph)
             if (graph.readFromFile(filename))
             {
                 cout << "Grafo carregado com sucesso!\n";
-                cout << "Visao do grafo atualizado com os dados do arquivo:\n";
-                graph.print();
             }
             break;
         }
@@ -135,8 +133,6 @@ void main_menu(Graph &graph)
             if (graph.readFromFile(filename))
             {
                 cout << "Grafo carregado com sucesso!\n";
-                cout << "Visao do grafo atualizado com os dados do arquivo:\n";
-                graph.print();
             }
         }
         else if (option == '2')
