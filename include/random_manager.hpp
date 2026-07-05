@@ -14,6 +14,9 @@ public:
     // Inicializa com uma semente fixa
     static void initialize(int custom_seed);
 
+    // Permite redefinir/definir a semente atual de forma explicita (e.g., para multiplas runs)
+    static void set_seed(int custom_seed);
+
     // Retorna a semente utilizada
     static int get_seed();
 

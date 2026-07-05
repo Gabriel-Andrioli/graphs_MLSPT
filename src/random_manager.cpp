@@ -40,6 +40,13 @@ void RandomManager::initialize(int custom_seed)
     cout << "=========================================\n\n";
 }
 
+void RandomManager::set_seed(int custom_seed)
+{
+    seed = custom_seed;
+    srand(static_cast<unsigned int>(seed));
+    initialized = true;
+}
+
 int RandomManager::get_seed()
 {
     return seed;

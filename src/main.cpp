@@ -1,9 +1,13 @@
 #include <iostream>
 #include <limits>
 #include <algorithm>
+#include <filesystem>
+#include <fstream>
+#include <chrono>
 #include "graph.hpp"
 #include "random_manager.hpp"
 #include "solver.hpp"
+#include "generator_core.hpp"
 
 using namespace std;
 
@@ -110,6 +114,7 @@ void main_menu(Graph &graph)
         cout << "6 - Executar Algoritmo Guloso (Fases 1 a 4)\n";
         cout << "7 - Executar Algoritmo Guloso Randomizado\n";
         cout << "8 - Executar Algoritmo Guloso Randomizado Reativo\n";
+        cout << "9 - Executar em lote\n";
         cout << "X - Sair\n";
         cout << "Escolha: ";
         cin >> option;
@@ -473,6 +478,148 @@ void main_menu(Graph &graph)
                 }
                 cout << "=================================================\n";
             }
+        }
+        else if (option == '9')
+        {
+            cout << "Iniciando execucao em lote...\n";
+            
+            string root_dir = get_project_root();
+            string results_dir = root_dir + "/results";
+            string data_dir = root_dir + "/data";
+            
+            std::filesystem::create_directories(results_dir);
+            string csv_path = results_dir + "/results.csv";
+            
+            int master_seed = RandomManager::get_seed();
+            // Gera 10 sementes determinísticas a partir do estado atual do RandomManager
+            vector<int> run_seeds(10);
+            for (int r = 0; r < 10; ++r)
+            {
+                run_seeds[r] = RandomManager::next_int(1, 1000000);
+            }
+            
+            ofstream out(csv_path, ios::app);
+            if (!out.is_open())
+            {
+                cout << "Erro ao abrir " << csv_path << " para escrita.\n";
+                continue;
+            }
+            
+            out.seekp(0, ios::end);
+            if (out.tellp() == 0)
+            {
+                out << "# master_seed: " << master_seed << "\n";
+                out << "instance,run_id,seed,greedy,rand_0.3,rand_0.5,rand_0.8,react_0.5,react_1.0,react_2.0,"
+                    << "time_greedy,time_rand_0.3,time_rand_0.5,time_rand_0.8,time_react_0.5,time_react_1.0,time_react_2.0\n";
+            }
+            
+            vector<double> rand_alphas = {0.3, 0.5, 0.8};
+            vector<double> react_deltas = {0.5, 1.0, 2.0};
+            vector<double> base_alphas = {0.0, 0.2, 0.4, 0.6, 0.8, 1.0};
+            int rand_iterations = 50;
+            int react_iterations = 300;
+            int block_size = 30;
+            
+            for (int run = 1; run <= 10; ++run)
+            {
+                int current_seed = run_seeds[run - 1];
+                RandomManager::set_seed(current_seed);
+                
+                cout << "\n=== INICIANDO RUN " << run << " (Semente: " << current_seed << ") ===\n";
+                cout << "  Gerando novas instancias na pasta data...\n";
+                int total_gerado = run_full_generation(data_dir);
+                cout << "  " << total_gerado << " instancias geradas.\n";
+                
+                vector<string> files;
+                for (const auto & entry : std::filesystem::recursive_directory_iterator(data_dir))
+                {
+                    if (entry.is_regular_file() && entry.path().extension() == ".txt")
+                    {
+                        files.push_back(entry.path().string());
+                    }
+                }
+                
+                for (const string& filepath : files)
+                {
+                    Graph batch_graph;
+                    if (!batch_graph.readFromFile(filepath)) continue;
+                    
+                    int n = batch_graph.get_vertices_count();
+                    string instance_name = std::filesystem::path(filepath).stem().string();
+                    
+                    cout << "  Resolvendo " << instance_name << " (n=" << n << ")...\n";
+                    
+                    MLSPTSolver solver(batch_graph);
+                    
+                    // Medir tempo do algoritmo Guloso
+                    auto start_greedy = std::chrono::steady_clock::now();
+                    solver.solve_greedy();
+                    auto end_greedy = std::chrono::steady_clock::now();
+                    double time_greedy = std::chrono::duration<double, std::milli>(end_greedy - start_greedy).count();
+                    int greedy_sol = solver.get_used_labels().size();
+                    
+                    vector<string> rand_sols;
+                    vector<string> rand_times;
+                    vector<string> react_sols;
+                    vector<string> react_times;
+                    
+                    if (n <= 100)
+                    {
+                        for (double a : rand_alphas)
+                        {
+                            auto start_rand = std::chrono::steady_clock::now();
+                            solver.solve_randomized(a, rand_iterations);
+                            auto end_rand = std::chrono::steady_clock::now();
+                            double time_rand = std::chrono::duration<double, std::milli>(end_rand - start_rand).count();
+                            
+                            rand_sols.push_back(to_string(solver.get_used_labels().size()));
+                            rand_times.push_back(to_string(time_rand));
+                        }
+                        
+                        for (double delta : react_deltas)
+                        {
+                            auto start_react = std::chrono::steady_clock::now();
+                            solver.solve_reactive(react_iterations, block_size, delta, base_alphas);
+                            auto end_react = std::chrono::steady_clock::now();
+                            double time_react = std::chrono::duration<double, std::milli>(end_react - start_react).count();
+                            
+                            react_sols.push_back(to_string(solver.get_used_labels().size()));
+                            react_times.push_back(to_string(time_react));
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < rand_alphas.size(); ++i)
+                        {
+                            rand_sols.push_back("NA");
+                            rand_times.push_back("NA");
+                        }
+                        for (size_t i = 0; i < react_deltas.size(); ++i)
+                        {
+                            react_sols.push_back("NA");
+                            react_times.push_back("NA");
+                        }
+                    }
+                    
+                    // Escreve colunas no CSV
+                    out << instance_name << "," << run << "," << current_seed << ","
+                        << greedy_sol << ",";
+                    
+                    for (const auto& s : rand_sols) out << s << ",";
+                    for (const auto& s : react_sols) out << s << ",";
+                    
+                    out << time_greedy << ",";
+                    for (const auto& t : rand_times) out << t << ",";
+                    for (size_t i = 0; i < react_times.size(); ++i)
+                    {
+                        out << react_times[i];
+                        if (i < react_times.size() - 1) out << ",";
+                    }
+                    out << "\n";
+                }
+            }
+            out.close();
+            cout << "Execucao em lote finalizada! Resultados salvos em " << csv_path << "\n";
         }
         else if (option == 'X')
         {

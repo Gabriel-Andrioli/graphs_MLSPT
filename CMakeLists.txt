@@ -17,8 +17,9 @@ set(GRAPH_SOURCES
     src/solver/greedy.cpp 
     src/solver/randomized.cpp 
     src/solver/reactive.cpp
+    src/generator_core.cpp
 )
 
 add_executable(MLSTP src/main.cpp ${GRAPH_SOURCES})
-add_executable(generator src/generator.cpp src/random_manager.cpp)
+add_executable(generator src/generator.cpp src/random_manager.cpp src/generator_core.cpp)
 
