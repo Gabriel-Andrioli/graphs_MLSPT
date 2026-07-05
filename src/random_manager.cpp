@@ -50,3 +50,8 @@ int RandomManager::next_int(int min, int max)
     if (max < min) return min;
     return min + rand() % (max - min + 1);
 }
+
+double RandomManager::next_double()
+{
+    return (double)rand() / (RAND_MAX + 1.0);
+}

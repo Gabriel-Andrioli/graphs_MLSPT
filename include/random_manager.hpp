@@ -19,6 +19,9 @@ public:
 
     // Retorna um inteiro aleatório no intervalo [min, max] (inclusive) usando rand()
     static int next_int(int min, int max);
+
+    // Retorna um numero real aleatorio no intervalo [0.0, 1.0)
+    static double next_double();
 };
 
 #endif // RANDOM_MANAGER_HPP

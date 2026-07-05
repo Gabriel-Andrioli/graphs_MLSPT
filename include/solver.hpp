@@ -24,6 +24,7 @@ private:
         }
     };
     unordered_set<pair<int, int>, PairHash> selected_edges_set; // Busca rápida para duplicados
+    double best_alpha = -1.0; // Guarda o melhor alfa encontrado em algoritmos randomizados/reativos
 
     // Métodos privados das fases
     void preprocess();            // Fase 1
@@ -40,7 +41,7 @@ public:
     void solve();
     void solve_greedy();
     void solve_randomized(double alpha, int iterations);
-    void solve_reactive(int iterations, int block_size, const vector<double> &alphas);
+    void solve_reactive(int iterations, int block_size, double delta, const vector<double> &alphas);
     
     // Getters para fins de teste
     const unordered_map<int, int>& get_recurrence_map() const;
@@ -48,6 +49,7 @@ public:
     const unordered_set<int>& get_visited_vertices() const;
     const unordered_set<int>& get_used_labels() const;
     const vector<int>& get_label_priority_queue() const;
+    double get_best_alpha() const;
 };
 
 #endif // SOLVER_HPP

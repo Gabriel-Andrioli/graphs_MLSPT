@@ -90,3 +90,8 @@ const vector<int>& MLSPTSolver::get_label_priority_queue() const
 {
     return label_priority_queue;
 }
+
+double MLSPTSolver::get_best_alpha() const
+{
+    return best_alpha;
+}
