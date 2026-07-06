@@ -261,7 +261,8 @@ scenario_n1000_l1250_d0.80_instance01,5,18611,28,NA,NA,NA,NA,NA,NA,108.265,NA,NA
 scenario_n1000_l250_d0.20_instance01,5,18611,41,NA,NA,NA,NA,NA,NA,34.0463,NA,NA,NA,NA,NA,NA
 scenario_n1000_l250_d0.50_instance01,5,18611,36,NA,NA,NA,NA,NA,NA,57.547,NA,NA,NA,NA,NA,NA
 scenario_n1000_l250_d0.80_instance01,5,18611,10,NA,NA,NA,NA,NA,NA,94.3653,NA,NA,NA,NA,NA,NA
-scenario_n1000_l500_d0.20_instance01,5,18611,51,NA,NA,NA,Nscenario_n1000_l1000_d0.20_instance01,1,68,NA,NA,NA,NA,NA,NA
+scenario_n1000_l500_d0.20_instance01,5,18611,51,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+scenario_n1000_l1000_d0.20_instance01,1,68,NA,NA,NA,NA,NA,NA
 scenario_n1000_l1000_d0.50_instance01,1,48,NA,NA,NA,NA,NA,NA
 scenario_n1000_l1000_d0.80_instance01,1,21,NA,NA,NA,NA,NA,NA
 scenario_n1000_l1250_d0.20_instance01,1,77,NA,NA,NA,NA,NA,NA

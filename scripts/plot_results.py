@@ -71,6 +71,16 @@ def process_results():
         
     df['N'] = df['instance'].apply(extract_n)
 
+    # Colunas de algoritmo e tempos
+    algo_cols = ['greedy', 'rand_0.3', 'rand_0.5', 'rand_0.8', 'react_0.5', 'react_1.0', 'react_2.0']
+    time_cols = ['time_greedy', 'time_rand_0.3', 'time_rand_0.5', 'time_rand_0.8', 'time_react_0.5', 'time_react_1.0', 'time_react_2.0']
+    all_cols = algo_cols + time_cols
+
+    # Converte todas as colunas de dados para numerico (valores nao-numericos como NA ou texto corrompido viram NaN)
+    for col in all_cols:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors='coerce')
+
     # ---------------------------------------------------------
     # 1. Tabela com as medias (Apenas N <= 100)
     # ---------------------------------------------------------
@@ -78,11 +88,6 @@ def process_results():
     
     if not df_small.empty:
         print("\n=== GERANDO TABELA DE MEDIAS (N <= 100) ===")
-        # Colunas de algoritmo
-        algo_cols = ['greedy', 'rand_0.3', 'rand_0.5', 'rand_0.8', 'react_0.5', 'react_1.0', 'react_2.0']
-        time_cols = ['time_greedy', 'time_rand_0.3', 'time_rand_0.5', 'time_rand_0.8', 'time_react_0.5', 'time_react_1.0', 'time_react_2.0']
-        all_cols = algo_cols + time_cols
-        
         # Agrupa por instancia e calcula a media de custos e tempos
         df_mean = df_small.groupby(['instance', 'N'])[all_cols].mean().round(2).reset_index()
         if master_seed is not None:
