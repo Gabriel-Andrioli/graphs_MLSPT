@@ -9,6 +9,7 @@ using namespace std;
 
 void MLSPTSolver::solve_reactive(int iterations, int block_size, double delta, const vector<double> &alphas)
 {
+    best_alpha = -1.0;
     int k = alphas.size();
     if (k == 0 || iterations <= 0 || block_size <= 0) return;
 
