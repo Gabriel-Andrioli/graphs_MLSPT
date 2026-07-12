@@ -111,7 +111,7 @@ void main_menu(Graph &graph)
         cout << "3 - Consultar rotulo de aresta\n";
         cout << "4 - Obter quantidade de vertices\n";
         cout << "5 - Obter frequencias globais de rotulos\n";
-        cout << "6 - Executar Algoritmo Guloso (Fases 1 a 4)\n";
+        cout << "6 - Executar Algoritmo Guloso\n";
         cout << "7 - Executar Algoritmo Guloso Randomizado\n";
         cout << "8 - Executar Algoritmo Guloso Randomizado Reativo\n";
         cout << "9 - Executar em lote\n";
