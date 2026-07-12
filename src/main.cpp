@@ -419,7 +419,7 @@ void main_menu(Graph &graph)
             }
             else
             {
-                vector<double> alphas = {0.0, 0.2, 0.4, 0.6, 0.8, 1.0};
+                vector<double> alphas = {0.1, 0.2, 0.3};
                 MLSPTSolver solver(graph);
                 solver.solve_reactive(iterations, block_size, delta, alphas);
 
@@ -513,10 +513,10 @@ void main_menu(Graph &graph)
                     << "time_greedy,time_rand_0.3,time_rand_0.5,time_rand_0.8,time_react_0.5,time_react_1.0,time_react_2.0\n";
             }
             
-            vector<double> rand_alphas = {0.3, 0.5, 0.8};
+            vector<double> rand_alphas = {0.1, 0.2, 0.3};
             vector<double> react_deltas = {0.5, 1.0, 2.0};
-            vector<double> base_alphas = {0.0, 0.2, 0.4, 0.6, 0.8, 1.0};
-            int rand_iterations = 50;
+            vector<double> base_alphas = {0.1, 0.2, 0.3};
+            int rand_iterations = 30;
             int react_iterations = 300;
             int block_size = 30;
             
