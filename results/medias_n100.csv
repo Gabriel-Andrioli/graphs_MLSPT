@@ -1,4 +1,4 @@
-instance,N,greedy,rand_0.3,rand_0.5,rand_0.8,react_0.5,react_1.0,react_2.0,time_greedy,time_rand_0.3,time_rand_0.5,time_rand_0.8,time_react_0.5,time_react_1.0,time_react_2.0,master_seed
+instance,N,greedy,rand_0.1,rand_0.2,rand_0.3,react_0.5,react_1.0,react_2.0,time_greedy,time_rand_0.1,time_rand_0.2,time_rand_0.3,time_react_0.5,time_react_1.0,time_react_2.0,master_seed
 scenario_n100_l100_d0.20_instance01,100,18.29,25.42,35.04,25.42,13.58,13.46,13.21,2.75,172.69,194.62,223.03,1857.22,1831.31,1785.25,1783263541
 scenario_n100_l100_d0.50_instance01,100,14.96,23.96,34.83,22.33,8.08,8.08,9.29,2.89,238.91,270.42,301.06,2543.37,2493.37,2419.04,1783263541
 scenario_n100_l100_d0.80_instance01,100,13.38,23.83,34.42,21.79,6.92,6.92,8.5,3.53,316.74,352.59,382.75,3297.34,3254.87,3149.95,1783263541

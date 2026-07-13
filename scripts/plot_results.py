@@ -100,9 +100,9 @@ def render_paper_table(data_df, filename, title, has_best=True):
         
         # Sub-headers (Row 1)
         y -= header_height
-        draw_cell(x_positions[4], y, col_widths[4], header_height, '0,30', is_header=True, font_size=9, weight='bold')
-        draw_cell(x_positions[5], y, col_widths[5], header_height, '0,50', is_header=True, font_size=9, weight='bold')
-        draw_cell(x_positions[6], y, col_widths[6], header_height, '0,80', is_header=True, font_size=9, weight='bold')
+        draw_cell(x_positions[4], y, col_widths[4], header_height, '0,10', is_header=True, font_size=9, weight='bold')
+        draw_cell(x_positions[5], y, col_widths[5], header_height, '0,20', is_header=True, font_size=9, weight='bold')
+        draw_cell(x_positions[6], y, col_widths[6], header_height, '0,30', is_header=True, font_size=9, weight='bold')
         
         draw_cell(x_positions[7], y, col_widths[7], header_height, '0,50', is_header=True, font_size=9, weight='bold')
         draw_cell(x_positions[8], y, col_widths[8], header_height, '1,00', is_header=True, font_size=9, weight='bold')
@@ -118,9 +118,9 @@ def render_paper_table(data_df, filename, title, has_best=True):
         
         # Sub-headers (Row 1)
         y -= header_height
-        draw_cell(x_positions[3], y, col_widths[3], header_height, '0,30', is_header=True, font_size=9, weight='bold')
-        draw_cell(x_positions[4], y, col_widths[4], header_height, '0,50', is_header=True, font_size=9, weight='bold')
-        draw_cell(x_positions[5], y, col_widths[5], header_height, '0,80', is_header=True, font_size=9, weight='bold')
+        draw_cell(x_positions[3], y, col_widths[3], header_height, '0,10', is_header=True, font_size=9, weight='bold')
+        draw_cell(x_positions[4], y, col_widths[4], header_height, '0,20', is_header=True, font_size=9, weight='bold')
+        draw_cell(x_positions[5], y, col_widths[5], header_height, '0,30', is_header=True, font_size=9, weight='bold')
         
         draw_cell(x_positions[6], y, col_widths[6], header_height, '0,50', is_header=True, font_size=9, weight='bold')
         draw_cell(x_positions[7], y, col_widths[7], header_height, '1,00', is_header=True, font_size=9, weight='bold')
@@ -134,7 +134,7 @@ def render_paper_table(data_df, filename, title, has_best=True):
         if is_media:
             bg = '#f1f1f1'
             
-        algo_cols = ['greedy', 'rand_0.3', 'rand_0.5', 'rand_0.8', 'react_0.5', 'react_1.0', 'react_2.0']
+        algo_cols = ['greedy', 'rand_0.1', 'rand_0.2', 'rand_0.3', 'react_0.5', 'react_1.0', 'react_2.0']
         if not is_media:
             row_algo_vals = [row[c] for c in algo_cols if pd.notna(row[c])]
             min_val = min(row_algo_vals) if row_algo_vals else None
@@ -232,6 +232,16 @@ def process_results():
 
     df = pd.DataFrame(rows, columns=header)
     
+    # Corrige os nomes das colunas de alfas randomizados (que no CSV estao como 0.3, 0.5, 0.8 mas correspondem a 0.1, 0.2, 0.3)
+    df = df.rename(columns={
+        'rand_0.3': 'rand_0.1',
+        'rand_0.5': 'rand_0.2',
+        'rand_0.8': 'rand_0.3',
+        'time_rand_0.3': 'time_rand_0.1',
+        'time_rand_0.5': 'time_rand_0.2',
+        'time_rand_0.8': 'time_rand_0.3'
+    })
+    
     # Extrai o N do nome da instancia (ex: scenario_n1000_l1000_...)
     def extract_n(instance_name):
         match = re.search(r'_n(\d+)_', instance_name)
@@ -241,9 +251,9 @@ def process_results():
         
     df['N'] = df['instance'].apply(extract_n)
 
-    # Colunas de algoritmo e tempos
-    algo_cols = ['greedy', 'rand_0.3', 'rand_0.5', 'rand_0.8', 'react_0.5', 'react_1.0', 'react_2.0']
-    time_cols = ['time_greedy', 'time_rand_0.3', 'time_rand_0.5', 'time_rand_0.8', 'time_react_0.5', 'time_react_1.0', 'time_react_2.0']
+    # Colunas de algoritmo e tempos (atualizadas com os nomes corretos dos alfas)
+    algo_cols = ['greedy', 'rand_0.1', 'rand_0.2', 'rand_0.3', 'react_0.5', 'react_1.0', 'react_2.0']
+    time_cols = ['time_greedy', 'time_rand_0.1', 'time_rand_0.2', 'time_rand_0.3', 'time_react_0.5', 'time_react_1.0', 'time_react_2.0']
     best_alpha_cols = ['best_alpha_react_0.5', 'best_alpha_react_1.0', 'best_alpha_react_2.0']
     
     all_cols = algo_cols + time_cols
@@ -392,9 +402,9 @@ def process_results():
                         'best': best_avg,
                         'literature': lit_gap,
                         'greedy': gaps['greedy'],
+                        'rand_0.1': gaps['rand_0.1'],
+                        'rand_0.2': gaps['rand_0.2'],
                         'rand_0.3': gaps['rand_0.3'],
-                        'rand_0.5': gaps['rand_0.5'],
-                        'rand_0.8': gaps['rand_0.8'],
                         'react_0.5': gaps['react_0.5'],
                         'react_1.0': gaps['react_1.0'],
                         'react_2.0': gaps['react_2.0']
@@ -408,16 +418,16 @@ def process_results():
                     'best': np.nan,
                     'literature': df_paper['literature'].mean(),
                     'greedy': df_paper['greedy'].mean(),
+                    'rand_0.1': df_paper['rand_0.1'].mean(),
+                    'rand_0.2': df_paper['rand_0.2'].mean(),
                     'rand_0.3': df_paper['rand_0.3'].mean(),
-                    'rand_0.5': df_paper['rand_0.5'].mean(),
-                    'rand_0.8': df_paper['rand_0.8'].mean(),
                     'react_0.5': df_paper['react_0.5'].mean(),
                     'react_1.0': df_paper['react_1.0'].mean(),
                     'react_2.0': df_paper['react_2.0'].mean()
                 }
                 
                 df_paper = pd.concat([df_paper, pd.DataFrame([mean_row])], ignore_index=True)
-                df_paper = df_paper[['instance', 'best', 'literature', 'greedy', 'rand_0.3', 'rand_0.5', 'rand_0.8', 'react_0.5', 'react_1.0', 'react_2.0']]
+                df_paper = df_paper[['instance', 'best', 'literature', 'greedy', 'rand_0.1', 'rand_0.2', 'rand_0.3', 'react_0.5', 'react_1.0', 'react_2.0']]
                 
                 # Salvar tabela plana em CSV
                 out_csv_paper = os.path.join(out_dir, f'tabela_paper_n{n_val}.csv')
@@ -428,7 +438,7 @@ def process_results():
                 out_pdf_paper = os.path.join(out_dir, f'tabela_paper_n{n_val}.pdf')
                 render_paper_table(df_paper, out_pdf_paper, f'Resultados Comparativos de Rótulos (N = {n_val}) - Desvio Decimal')
                 print(f"Tabela de rótulos em múltiplos níveis salva em '{out_pdf_paper}'")
-
+ 
                 # --- Tabela de Rotulos (valores absolutos) ---
                 abs_rows = []
                 for inst in instances:
@@ -450,9 +460,9 @@ def process_results():
                         'best': best_avg,
                         'literature': lit_labels_val,
                         'greedy': means['greedy'],
+                        'rand_0.1': means['rand_0.1'],
+                        'rand_0.2': means['rand_0.2'],
                         'rand_0.3': means['rand_0.3'],
-                        'rand_0.5': means['rand_0.5'],
-                        'rand_0.8': means['rand_0.8'],
                         'react_0.5': means['react_0.5'],
                         'react_1.0': means['react_1.0'],
                         'react_2.0': means['react_2.0']
@@ -466,16 +476,16 @@ def process_results():
                     'best': np.nan,
                     'literature': df_abs['literature'].mean(),
                     'greedy': df_abs['greedy'].mean(),
+                    'rand_0.1': df_abs['rand_0.1'].mean(),
+                    'rand_0.2': df_abs['rand_0.2'].mean(),
                     'rand_0.3': df_abs['rand_0.3'].mean(),
-                    'rand_0.5': df_abs['rand_0.5'].mean(),
-                    'rand_0.8': df_abs['rand_0.8'].mean(),
                     'react_0.5': df_abs['react_0.5'].mean(),
                     'react_1.0': df_abs['react_1.0'].mean(),
                     'react_2.0': df_abs['react_2.0'].mean()
                 }
                 
                 df_abs = pd.concat([df_abs, pd.DataFrame([mean_abs_row])], ignore_index=True)
-                df_abs = df_abs[['instance', 'best', 'literature', 'greedy', 'rand_0.3', 'rand_0.5', 'rand_0.8', 'react_0.5', 'react_1.0', 'react_2.0']]
+                df_abs = df_abs[['instance', 'best', 'literature', 'greedy', 'rand_0.1', 'rand_0.2', 'rand_0.3', 'react_0.5', 'react_1.0', 'react_2.0']]
                 
                 # Salvar tabela plana em CSV
                 out_csv_abs = os.path.join(out_dir, f'tabela_absoluta_n{n_val}.csv')
@@ -503,9 +513,9 @@ def process_results():
                         'instance': inst,
                         'literature': lit_time_val,
                         'greedy': time_means['time_greedy'],
+                        'rand_0.1': time_means['time_rand_0.1'],
+                        'rand_0.2': time_means['time_rand_0.2'],
                         'rand_0.3': time_means['time_rand_0.3'],
-                        'rand_0.5': time_means['time_rand_0.5'],
-                        'rand_0.8': time_means['time_rand_0.8'],
                         'react_0.5': time_means['time_react_0.5'],
                         'react_1.0': time_means['time_react_1.0'],
                         'react_2.0': time_means['time_react_2.0']
@@ -518,16 +528,16 @@ def process_results():
                     'instance': 'Média',
                     'literature': df_time['literature'].mean(),
                     'greedy': df_time['greedy'].mean(),
+                    'rand_0.1': df_time['rand_0.1'].mean(),
+                    'rand_0.2': df_time['rand_0.2'].mean(),
                     'rand_0.3': df_time['rand_0.3'].mean(),
-                    'rand_0.5': df_time['rand_0.5'].mean(),
-                    'rand_0.8': df_time['rand_0.8'].mean(),
                     'react_0.5': df_time['react_0.5'].mean(),
                     'react_1.0': df_time['react_1.0'].mean(),
                     'react_2.0': df_time['react_2.0'].mean()
                 }
                 
                 df_time = pd.concat([df_time, pd.DataFrame([mean_time_row])], ignore_index=True)
-                df_time = df_time[['instance', 'literature', 'greedy', 'rand_0.3', 'rand_0.5', 'rand_0.8', 'react_0.5', 'react_1.0', 'react_2.0']]
+                df_time = df_time[['instance', 'literature', 'greedy', 'rand_0.1', 'rand_0.2', 'rand_0.3', 'react_0.5', 'react_1.0', 'react_2.0']]
                 
                 # Salvar tabela plana em CSV
                 out_csv_time = os.path.join(out_dir, f'tabela_time_n{n_val}.csv')
