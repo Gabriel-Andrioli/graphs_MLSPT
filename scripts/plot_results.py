@@ -198,7 +198,39 @@ def process_results():
             master_seed = first_line.split(':')[1].strip()
 
     print(f"Lendo {csv_file}...")
-    df = pd.read_csv(csv_file, comment='#')
+    
+    # Leitura robusta do arquivo CSV linha por linha
+    rows = []
+    header = None
+    with open(csv_file, 'r', encoding='utf-8') as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith('#'):
+                continue
+            parts = [p.strip() for p in line.split(',')]
+            if header is None:
+                header = parts
+            else:
+                rows.append(parts)
+
+    # Caso algumas linhas tenham mais colunas que o cabecalho, expande o cabecalho
+    max_cols = max(len(r) for r in rows) if rows else len(header)
+    if len(header) < max_cols:
+        extra_cols = ['best_alpha_react_0.5', 'best_alpha_react_1.0', 'best_alpha_react_2.0']
+        needed = max_cols - len(header)
+        header = header + extra_cols[:needed]
+        # Se ainda houver mais colunas do que as conhecidas, cria colunas genericas
+        if len(header) < max_cols:
+            header = header + [f'extra_col_{i}' for i in range(len(header), max_cols)]
+
+    # Preenche as linhas que tiverem menos colunas com None
+    for i, r in enumerate(rows):
+        if len(r) < len(header):
+            rows[i] = r + [None] * (len(header) - len(r))
+        elif len(r) > len(header):
+            rows[i] = r[:len(header)]
+
+    df = pd.DataFrame(rows, columns=header)
     
     # Extrai o N do nome da instancia (ex: scenario_n1000_l1000_...)
     def extract_n(instance_name):
@@ -212,12 +244,15 @@ def process_results():
     # Colunas de algoritmo e tempos
     algo_cols = ['greedy', 'rand_0.3', 'rand_0.5', 'rand_0.8', 'react_0.5', 'react_1.0', 'react_2.0']
     time_cols = ['time_greedy', 'time_rand_0.3', 'time_rand_0.5', 'time_rand_0.8', 'time_react_0.5', 'time_react_1.0', 'time_react_2.0']
+    best_alpha_cols = ['best_alpha_react_0.5', 'best_alpha_react_1.0', 'best_alpha_react_2.0']
+    
     all_cols = algo_cols + time_cols
+    # Todas as colunas que devem ser convertidas para numerico (inclui melhores alfas se existirem)
+    numeric_cols = all_cols + [col for col in best_alpha_cols if col in df.columns]
 
     # Converte todas as colunas de dados para numerico (valores nao-numericos como NA ou texto corrompido viram NaN)
-    for col in all_cols:
-        if col in df.columns:
-            df[col] = pd.to_numeric(df[col], errors='coerce')
+    for col in numeric_cols:
+        df[col] = pd.to_numeric(df[col], errors='coerce')
 
     # ---------------------------------------------------------
     # 1. Tabela com as medias (Apenas N <= 100)
@@ -393,6 +428,64 @@ def process_results():
                 out_pdf_paper = os.path.join(out_dir, f'tabela_paper_n{n_val}.pdf')
                 render_paper_table(df_paper, out_pdf_paper, f'Resultados Comparativos de Rótulos (N = {n_val}) - Desvio Decimal')
                 print(f"Tabela de rótulos em múltiplos níveis salva em '{out_pdf_paper}'")
+
+                # --- Tabela de Rotulos (valores absolutos) ---
+                abs_rows = []
+                for inst in instances:
+                    df_inst = df_n[df_n['instance'] == inst]
+                    means = df_inst[algo_cols].mean()
+                    key = inst.replace('scenario_', '')
+                    lit_labels_val = np.nan
+                    if key in lit_data:
+                        lit_labels_val = lit_data[key]['labels']
+                    
+                    our_best_avg = means.min()
+                    if pd.notna(lit_labels_val):
+                        best_avg = min(our_best_avg, lit_labels_val)
+                    else:
+                        best_avg = our_best_avg
+                        
+                    abs_rows.append({
+                        'instance': inst,
+                        'best': best_avg,
+                        'literature': lit_labels_val,
+                        'greedy': means['greedy'],
+                        'rand_0.3': means['rand_0.3'],
+                        'rand_0.5': means['rand_0.5'],
+                        'rand_0.8': means['rand_0.8'],
+                        'react_0.5': means['react_0.5'],
+                        'react_1.0': means['react_1.0'],
+                        'react_2.0': means['react_2.0']
+                    })
+                    
+                df_abs = pd.DataFrame(abs_rows)
+                
+                # Linha de Media
+                mean_abs_row = {
+                    'instance': 'Média',
+                    'best': np.nan,
+                    'literature': df_abs['literature'].mean(),
+                    'greedy': df_abs['greedy'].mean(),
+                    'rand_0.3': df_abs['rand_0.3'].mean(),
+                    'rand_0.5': df_abs['rand_0.5'].mean(),
+                    'rand_0.8': df_abs['rand_0.8'].mean(),
+                    'react_0.5': df_abs['react_0.5'].mean(),
+                    'react_1.0': df_abs['react_1.0'].mean(),
+                    'react_2.0': df_abs['react_2.0'].mean()
+                }
+                
+                df_abs = pd.concat([df_abs, pd.DataFrame([mean_abs_row])], ignore_index=True)
+                df_abs = df_abs[['instance', 'best', 'literature', 'greedy', 'rand_0.3', 'rand_0.5', 'rand_0.8', 'react_0.5', 'react_1.0', 'react_2.0']]
+                
+                # Salvar tabela plana em CSV
+                out_csv_abs = os.path.join(out_dir, f'tabela_absoluta_n{n_val}.csv')
+                df_abs.to_csv(out_csv_abs, index=False)
+                print(f"Tabela de rótulos absolutos plana salva em '{out_csv_abs}'")
+                
+                # Salvar tabela com cabecalhos em PDF
+                out_pdf_abs = os.path.join(out_dir, f'tabela_absoluta_n{n_val}.pdf')
+                render_paper_table(df_abs, out_pdf_abs, f'Resultados Comparativos de Rótulos Absolutos (N = {n_val})')
+                print(f"Tabela de rótulos absolutos salva em '{out_pdf_abs}'")
                 
                 # --- Tabela de Tempos (absolutos) ---
                 time_rows = []
@@ -477,6 +570,44 @@ def process_results():
         out_bar = os.path.join(out_dir, 'barplot_grandes.pdf')
         save_figure(out_bar)
         print(f"Grafico salvo em '{out_bar}'")
+
+    # ---------------------------------------------------------
+    # 4. Analise de Melhores Alfas do Reativo (N <= 100)
+    # ---------------------------------------------------------
+    present_alpha_cols = [c for c in best_alpha_cols if c in df.columns]
+    if present_alpha_cols:
+        print("\n=== ANALISE DOS MELHORES ALFAS DO REATIVO (N <= 100) ===")
+        df_alphas = df_small[df_small[present_alpha_cols].notna().any(axis=1)].copy()
+        if not df_alphas.empty:
+            df_alphas_melt = df_alphas.melt(
+                id_vars=['instance', 'run_id', 'N'],
+                value_vars=present_alpha_cols,
+                var_name='Delta_Col',
+                value_name='Best_Alpha'
+            )
+            # Extrai o valor do delta da coluna (ex: best_alpha_react_0.5 -> 0.5)
+            df_alphas_melt['Delta'] = df_alphas_melt['Delta_Col'].apply(lambda x: x.split('_')[-1])
+            
+            # Gera o grafico de barras da frequencia dos alfas
+            plt.figure(figsize=(10, 6))
+            sns.countplot(data=df_alphas_melt, x='Delta', hue='Best_Alpha', palette='viridis')
+            plt.title('Frequência de Escolha do Melhor Alfa por Delta (N <= 100)')
+            plt.ylabel('Vezes Escolhido como Melhor')
+            plt.xlabel('Delta (Fator de Reatividade)')
+            plt.legend(title='Melhor Alfa')
+            plt.tight_layout()
+            out_alpha_plot = os.path.join(out_dir, 'distribuicao_best_alphas.pdf')
+            save_figure(out_alpha_plot)
+            print(f"Gráfico de distribuição de melhores alfas salvo em '{out_alpha_plot}'")
+            
+            # Tabela resumindo as frequencias/percentuais de escolha
+            summary = df_alphas_melt.groupby(['Delta', 'Best_Alpha']).size().unstack(fill_value=0)
+            summary_pct = summary.div(summary.sum(axis=1), axis=0) * 100
+            summary_pct = summary_pct.round(2)
+            
+            out_alpha_csv = os.path.join(out_dir, 'summary_best_alphas.csv')
+            summary_pct.to_csv(out_alpha_csv)
+            print(f"Resumo de frequência de alfas salvo em '{out_alpha_csv}'")
 
     print("\nProcessamento concluido com sucesso!")
 
