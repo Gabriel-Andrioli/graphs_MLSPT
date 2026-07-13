@@ -111,7 +111,7 @@ void main_menu(Graph &graph)
         cout << "3 - Consultar rotulo de aresta\n";
         cout << "4 - Obter quantidade de vertices\n";
         cout << "5 - Obter frequencias globais de rotulos\n";
-        cout << "6 - Executar Algoritmo Guloso (Fases 1 a 4)\n";
+        cout << "6 - Executar Algoritmo Guloso\n";
         cout << "7 - Executar Algoritmo Guloso Randomizado\n";
         cout << "8 - Executar Algoritmo Guloso Randomizado Reativo\n";
         cout << "9 - Executar em lote\n";
@@ -419,7 +419,7 @@ void main_menu(Graph &graph)
             }
             else
             {
-                vector<double> alphas = {0.0, 0.2, 0.4, 0.6, 0.8, 1.0};
+                vector<double> alphas = {0.1, 0.2, 0.3};
                 MLSPTSolver solver(graph);
                 solver.solve_reactive(iterations, block_size, delta, alphas);
 
@@ -510,13 +510,14 @@ void main_menu(Graph &graph)
             {
                 out << "# master_seed: " << master_seed << "\n";
                 out << "instance,run_id,seed,greedy,rand_0.3,rand_0.5,rand_0.8,react_0.5,react_1.0,react_2.0,"
-                    << "time_greedy,time_rand_0.3,time_rand_0.5,time_rand_0.8,time_react_0.5,time_react_1.0,time_react_2.0\n";
+                    << "time_greedy,time_rand_0.3,time_rand_0.5,time_rand_0.8,time_react_0.5,time_react_1.0,time_react_2.0,"
+                    << "best_alpha_react_0.5,best_alpha_react_1.0,best_alpha_react_2.0\n";
             }
             
-            vector<double> rand_alphas = {0.3, 0.5, 0.8};
+            vector<double> rand_alphas = {0.1, 0.2, 0.3};
             vector<double> react_deltas = {0.5, 1.0, 2.0};
-            vector<double> base_alphas = {0.0, 0.2, 0.4, 0.6, 0.8, 1.0};
-            int rand_iterations = 50;
+            vector<double> base_alphas = {0.1, 0.2, 0.3};
+            int rand_iterations = 30;
             int react_iterations = 300;
             int block_size = 30;
             
@@ -562,6 +563,7 @@ void main_menu(Graph &graph)
                     vector<string> rand_times;
                     vector<string> react_sols;
                     vector<string> react_times;
+                    vector<string> react_best_alphas;
                     
                     if (n <= 100)
                     {
@@ -585,6 +587,7 @@ void main_menu(Graph &graph)
                             
                             react_sols.push_back(to_string(solver.get_used_labels().size()));
                             react_times.push_back(to_string(time_react));
+                            react_best_alphas.push_back(to_string(solver.get_best_alpha()));
                         }
                     }
                     else
@@ -598,6 +601,7 @@ void main_menu(Graph &graph)
                         {
                             react_sols.push_back("NA");
                             react_times.push_back("NA");
+                            react_best_alphas.push_back("NA");
                         }
                     }
                     
@@ -610,10 +614,12 @@ void main_menu(Graph &graph)
                     
                     out << time_greedy << ",";
                     for (const auto& t : rand_times) out << t << ",";
-                    for (size_t i = 0; i < react_times.size(); ++i)
+                    for (const auto& t : react_times) out << t << ",";
+                    
+                    for (size_t i = 0; i < react_best_alphas.size(); ++i)
                     {
-                        out << react_times[i];
-                        if (i < react_times.size() - 1) out << ",";
+                        out << react_best_alphas[i];
+                        if (i < react_best_alphas.size() - 1) out << ",";
                     }
                     out << "\n";
                 }
